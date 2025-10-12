@@ -48,14 +48,13 @@
       .favorite-btn{top:6px;right:6px;font-size:14px;padding:5px}
     }
 
-    /* small reset button */
     #resetStorageBtn{position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
   </style>
 </head>
 <body>
   <header>
     <h1>🍳 レシピメモ</h1>
-    <div class="version">ver: 2025-10-12-final</div>
+    <div class="version">ver: 2025-10-12-idbased</div>
     <div class="popular-tags" id="popularTags"></div>
   </header>
 
@@ -71,9 +70,6 @@
   <div class="grid" id="recipeGrid"></div>
 
   <script>
-  // ------------------------
-  // 設定
-  // ------------------------
   const RECIPES_JSON = "recipes.json";
   const recipeGrid = document.getElementById("recipeGrid");
   const searchInput = document.getElementById("search");
@@ -81,284 +77,210 @@
   const popularTagsEl = document.getElementById("popularTags");
 
   // ------------------------
-  // HTML escape helpers
+  // ユーティリティ
   // ------------------------
   function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-  function escapeAttr(s){ return escapeHtml(s||''); }
 
   // ------------------------
-  // favorites_v3: robust implementation
-  // - data saved under 'favorites_v3'
-  // - load is defensive and migrates from older keys if possible
+  // LocalStorageユーティリティ
   // ------------------------
-  function loadFavoritesRaw(key){
-    try{
-      const raw = localStorage.getItem(key);
-      return raw === null ? null : raw;
-    }catch(e){
-      return null;
-    }
+  function safeGet(key, fallback){
+    try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; }
+  }
+  function safeSet(key, value){
+    try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
   }
 
-  function parsePotentialFavorites(raw){
-    // Accept multiple legacy formats and return normalized object { name: true, ... }
-    if(raw === null) return null;
-    // If it's already the string "null" or "undefined", treat as null
-    const rtrim = raw.trim?.();
-    if(rtrim === "" || rtrim.toLowerCase() === "null" || rtrim.toLowerCase() === "undefined") return null;
+  // ------------------------
+  // タグ・閲覧履歴
+  // ------------------------
+  let tagUsage = safeGet("tagUsage", {});
+  function saveTagUsage(){ safeSet("tagUsage", tagUsage); }
 
-    // Try JSON.parse safely
-    try {
-      const parsed = JSON.parse(raw);
-      // If parsed is array => treat as list of names
-      if(Array.isArray(parsed)){
-        const out = Object.create(null);
-        parsed.forEach(v => { if(typeof v === "string" && v.trim()) out[v] = true; });
-        return out;
-      }
-      // If parsed is object => pick keys with true-like values
-      if(parsed && typeof parsed === "object"){
-        const out = Object.create(null);
-        Object.keys(parsed).forEach(k=>{
-          const v = parsed[k];
-          // Accept boolean true, numeric 1, or string "true" (case-insensitive)
-          if(v === true || v === 1 || (typeof v === "string" && v.toLowerCase()==="true")) out[k] = true;
-        });
-        return out;
-      }
-      // If parsed is string (e.g. JSON parsed a quoted string) -> treat as single name
-      if(typeof parsed === "string" && parsed.trim()){
-        const out = Object.create(null);
-        out[parsed.trim()] = true;
-        return out;
-      }
-    } catch(e){
-      // Not JSON: could be a comma-separated list or a legacy format like '["a","b"]' malformed
-      // Try basic heuristics: comma-separated names
-      try {
-        if(raw.indexOf(",") !== -1){
-          const parts = raw.split(",").map(s=>s.trim()).filter(Boolean);
-          if(parts.length){
-            const out = Object.create(null);
-            parts.forEach(p => out[p] = true);
-            return out;
-          }
-        }
-        // If raw looks like a single name (no JSON), accept it
-        if(raw.length && raw.length < 200 && !raw.includes("{") && !raw.includes("[")){
-          const out = Object.create(null);
-          out[raw.trim()] = true;
-          return out;
-        }
-      } catch(e2){}
-    }
-    // Fallback: cannot parse
-    return null;
-  }
+  let recentViewsById = safeGet("recentViews_v2_id", []);
+  function saveRecentViewsById(){ safeSet("recentViews_v2_id", recentViewsById); }
 
-  function loadFavoritesV3(){
-    // 1) try new key
-    let raw = loadFavoritesRaw("favorites_v3");
-    let parsed = parsePotentialFavorites(raw);
-    if(parsed) return parsed;
+  // ------------------------
+  // お気に入り(IDベース)
+  // ------------------------
+  const FAVORITES_KEY = "favorites_v4_id";
+  let favoritesById = safeGet(FAVORITES_KEY, {});
 
-    // 2) try previous keys for migration (favorites_v2, favorites)
-    raw = loadFavoritesRaw("favorites_v2");
-    parsed = parsePotentialFavorites(raw);
-    if(parsed) {
-      // save migrated to v3
-      try { localStorage.setItem("favorites_v3", JSON.stringify(parsed)); } catch(e){}
-      return parsed;
-    }
-
-    raw = loadFavoritesRaw("favorites");
-    parsed = parsePotentialFavorites(raw);
-    if(parsed) {
-      try { localStorage.setItem("favorites_v3", JSON.stringify(parsed)); } catch(e){}
-      return parsed;
-    }
-
-    // 3) nothing usable -> empty object
-    return Object.create(null);
-  }
-
-  function saveFavoritesV3(obj){
-    try {
-      localStorage.setItem("favorites_v3", JSON.stringify(obj));
-    } catch(e){
-      // ignore write errors
-      console.warn("saveFavoritesV3 error", e);
-    }
-  }
-
-  // initialize favorites
-  let favorites = loadFavoritesV3();
-
-  function isFavorite(name){
-    return !!(favorites && Object.prototype.hasOwnProperty.call(favorites, name) && favorites[name] === true);
-  }
-
-  function toggleFavorite(name){
-    // normalize name to string
-    const key = String(name || "");
-    if(isFavorite(key)){
-      delete favorites[key];
-    } else {
-      favorites[key] = true;
-    }
-    saveFavoritesV3(favorites);
-    // immediate UI update
+  function isFavoriteById(id){ return !!favoritesById[id]; }
+  function toggleFavoriteById(id){
+    if(!id) return;
+    if(isFavoriteById(id)) delete favoritesById[id];
+    else favoritesById[id] = true;
+    safeSet(FAVORITES_KEY, favoritesById);
     renderRecipes();
   }
 
   // ------------------------
-  // tag and recent handling (same as before)
+  // マイグレーション（旧データ救出）
   // ------------------------
-  function loadTagUsage(){ try{ const r = localStorage.getItem("tagUsage"); return r ? JSON.parse(r) : {}; } catch(e){ return {}; } }
-  function saveTagUsage(){ try{ localStorage.setItem("tagUsage", JSON.stringify(tagUsage)); } catch(e){} }
-  function loadRecentViews(){ try{ const r = localStorage.getItem("recentViews"); return r ? JSON.parse(r) : []; } catch(e){ return []; } }
-  function saveRecentViews(){ try{ localStorage.setItem("recentViews", JSON.stringify(recentViews)); } catch(e){} }
+  function loadLegacyFavorites(){
+    const keys = ["favorites_v3","favorites_v2","favorites"];
+    for(const k of keys){
+      try{
+        const raw = localStorage.getItem(k);
+        if(!raw) continue;
+        const parsed = JSON.parse(raw);
+        if(typeof parsed === "object"){
+          const names = Array.isArray(parsed) ? parsed : Object.keys(parsed);
+          names.forEach(n => {
+            const r = recipes.find(x => x.name === n);
+            if(r && r.id) favoritesById[r.id] = true;
+          });
+        }
+      }catch(e){}
+    }
+    safeSet(FAVORITES_KEY, favoritesById);
+  }
 
-  let tagUsage = loadTagUsage();
-  let recentViews = loadRecentViews();
+  function migrateRecentViews(){
+    try{
+      const old = safeGet("recentViews", []);
+      if(!old || !old.length) return;
+      const mapped = [];
+      old.forEach(n=>{
+        const r = recipes.find(x => x.name === n);
+        if(r && r.id && !mapped.includes(r.id)) mapped.push(r.id);
+      });
+      recentViewsById = mapped.slice(0,10);
+      saveRecentViewsById();
+    }catch(e){}
+  }
 
   // ------------------------
-  // load recipes and render
+  // データロード
   // ------------------------
   let recipes = [];
 
   fetch(RECIPES_JSON)
-    .then(r => r.json())
-    .then(data => {
-      recipes = Array.isArray(data) ? data : [];
+    .then(r=>r.json())
+    .then(data=>{
+      recipes = Array.isArray(data)?data:[];
+      loadLegacyFavorites();
+      migrateRecentViews();
       renderRecipes();
       renderPopularTags();
     })
-    .catch(err => console.error("recipes.json load error:", err));
+    .catch(e=>console.error("recipes.json load error",e));
 
   // ------------------------
-  // rendering
+  // 描画
   // ------------------------
   function renderRecipes(){
-    // refresh favorites from storage on each render to avoid out-of-sync (defensive)
-    favorites = loadFavoritesV3();
+    favoritesById = safeGet(FAVORITES_KEY,{});
+    const q = (searchInput.value||"").trim().toLowerCase();
 
-    const q = (searchInput.value || "").trim().toLowerCase();
-    let list = recipes.filter(r => {
-      const nameOk = r.name && r.name.toLowerCase().includes(q);
-      const tagOk = Array.isArray(r.tags) && r.tags.some(t => t.toLowerCase().includes(q));
-      return q === "" ? true : (nameOk || tagOk);
+    let list = recipes.filter(r=>{
+      const nOk = r.name && r.name.toLowerCase().includes(q);
+      const tOk = Array.isArray(r.tags) && r.tags.some(t=>t.toLowerCase().includes(q));
+      return q==="" ? true : (nOk||tOk);
     });
 
     const sortType = sortSelect.value;
-    if(sortType === "recent") {
-      list.sort((a,b) => recentViews.indexOf(b.name) - recentViews.indexOf(a.name));
-    } else if(sortType === "popular"){
-      list.sort((a,b) => ( (b.clicks||0) - (a.clicks||0) ));
-    } else {
-      list.sort((a,b) => {
-        const fa = isFavorite(a.name);
-        const fb = isFavorite(b.name);
-        return fa === fb ? 0 : (fa ? -1 : 1);
+    if(sortType==="recent"){
+      list.sort((a,b)=>recentViewsById.indexOf(b.id)-recentViewsById.indexOf(a.id));
+    }else if(sortType==="popular"){
+      list.sort((a,b)=>(b.clicks||0)-(a.clicks||0));
+    }else{
+      list.sort((a,b)=>{
+        const fa=isFavoriteById(a.id), fb=isFavoriteById(b.id);
+        return fa===fb?0:(fa?-1:1);
       });
     }
 
-    recipeGrid.innerHTML = "";
-    list.forEach(r => {
-      const card = document.createElement("div");
-      card.className = "recipe-card";
+    recipeGrid.innerHTML="";
+    list.forEach(r=>{
+      const card=document.createElement("div");
+      card.className="recipe-card";
 
-      // create elements (avoid inserting boolean attributes directly)
-      const favBtn = document.createElement("button");
-      favBtn.type = "button";
-      favBtn.className = "favorite-btn";
-      favBtn.textContent = "❤";
-      if(isFavorite(r.name)) favBtn.classList.add("favorited");
-      favBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleFavorite(r.name);
+      const favBtn=document.createElement("button");
+      favBtn.type="button";
+      favBtn.className="favorite-btn";
+      favBtn.textContent=isFavoriteById(r.id)?"❤":"♡";
+      if(isFavoriteById(r.id)) favBtn.classList.add("favorited");
+
+      const favHandler=(e)=>{
+        e.stopPropagation(); e.preventDefault();
+        toggleFavoriteById(r.id);
+        favBtn.classList.toggle("favorited",isFavoriteById(r.id));
+        favBtn.textContent=isFavoriteById(r.id)?"❤":"♡";
+      };
+      favBtn.addEventListener("pointerdown",favHandler);
+      favBtn.addEventListener("click",favHandler);
+
+      const img=document.createElement("img");
+      img.src=r.image||""; img.alt=r.name||"";
+      img.addEventListener("click",()=>{
+        if(r.url) window.open(r.url,"_blank");
+        r.clicks=(r.clicks||0)+1;
+        recentViewsById=[r.id,...recentViewsById.filter(x=>x!==r.id)].slice(0,10);
+        saveRecentViewsById();
       });
 
-      const img = document.createElement("img");
-      img.src = r.image || "";
-      img.alt = r.name || "";
-      img.addEventListener("click", () => {
-        // open detail in new tab (count click)
-        if(r.url) window.open(r.url, "_blank");
-        r.clicks = (r.clicks || 0) + 1;
-        recentViews = [r.name, ...recentViews.filter(n => n !== r.name)].slice(0,10);
-        saveRecentViews();
-      });
-
-      const info = document.createElement("div");
-      info.className = "recipe-info";
-      const title = document.createElement("div");
-      title.className = "recipe-title";
-      title.textContent = r.name || "";
-      const tagsWrap = document.createElement("div");
-      tagsWrap.className = "tags";
+      const info=document.createElement("div");
+      info.className="recipe-info";
+      const title=document.createElement("div");
+      title.className="recipe-title";
+      title.textContent=r.name||"";
+      const tagsWrap=document.createElement("div");
+      tagsWrap.className="tags";
       if(Array.isArray(r.tags)){
         r.tags.forEach(t=>{
-          const span = document.createElement("span");
-          span.className = "tag";
-          span.textContent = t;
-          span.addEventListener("click", (e) => {
+          const span=document.createElement("span");
+          span.className="tag"; span.textContent=t;
+          span.addEventListener("click",(e)=>{
             e.stopPropagation();
-            searchInput.value = t;
-            tagUsage[t] = (tagUsage[t] || 0) + 1;
-            saveTagUsage();
-            renderPopularTags();
-            renderRecipes();
+            searchInput.value=t;
+            tagUsage[t]=(tagUsage[t]||0)+1;
+            saveTagUsage(); renderPopularTags(); renderRecipes();
           });
           tagsWrap.appendChild(span);
         });
       }
-
       info.appendChild(title);
       info.appendChild(tagsWrap);
 
       card.appendChild(favBtn);
       card.appendChild(img);
       card.appendChild(info);
-
       recipeGrid.appendChild(card);
     });
   }
 
   function renderPopularTags(){
-    const entries = Object.entries(tagUsage).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    popularTagsEl.innerHTML = entries.map(([tag]) => `<button class="popular-tag">${escapeHtml(tag)}</button>`).join("");
+    const entries=Object.entries(tagUsage).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    popularTagsEl.innerHTML=entries.map(([t])=>`<button class="popular-tag">${escapeHtml(t)}</button>`).join("");
     popularTagsEl.querySelectorAll(".popular-tag").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const tag = btn.textContent;
-        searchInput.value = tag;
-        tagUsage[tag] = (tagUsage[tag] || 0) + 1;
-        saveTagUsage();
-        renderPopularTags();
-        renderRecipes();
+      btn.addEventListener("click",()=>{
+        const tag=btn.textContent;
+        searchInput.value=tag;
+        tagUsage[tag]=(tagUsage[tag]||0)+1;
+        saveTagUsage(); renderPopularTags(); renderRecipes();
       });
     });
   }
 
-  // ------------------------
-  // UI events
-  // ------------------------
-  searchInput.addEventListener("input", () => renderRecipes());
-  sortSelect.addEventListener("change", () => renderRecipes());
+  searchInput.addEventListener("input",()=>renderRecipes());
+  sortSelect.addEventListener("change",()=>renderRecipes());
 
   // ------------------------
-  // Reset button (helpful for testing)
+  // リセット
   // ------------------------
-  const resetBtn = document.createElement("button");
-  resetBtn.id = "resetStorageBtn";
-  resetBtn.textContent = "🧹 リセット";
-  resetBtn.addEventListener("click", ()=>{
-    try { localStorage.removeItem("favorites_v3"); localStorage.removeItem("favorites_v2"); localStorage.removeItem("favorites"); localStorage.removeItem("tagUsage"); localStorage.removeItem("recentViews"); } catch(e){}
-    alert("localStorage を初期化しました。再読み込みします。");
-    location.href = location.pathname + "?v=" + Date.now();
+  const resetBtn=document.createElement("button");
+  resetBtn.id="resetStorageBtn";
+  resetBtn.textContent="🧹 リセット";
+  resetBtn.addEventListener("click",()=>{
+    ["favorites_v4_id","favorites_v3","favorites_v2","favorites","tagUsage","recentViews_v2_id","recentViews"].forEach(k=>{
+      try{localStorage.removeItem(k);}catch(e){}
+    });
+    alert("localStorageを初期化しました。再読み込みします。");
+    location.reload();
   });
   document.body.appendChild(resetBtn);
-
   </script>
 </body>
 </html>
