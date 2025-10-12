@@ -254,5 +254,15 @@
     location.reload();
   });
   </script>
+
+<button id="showLocalStorageBtn" style="position:fixed;bottom:60px;right:20px;z-index:999;background:#4caf50;color:#fff;border:none;border-radius:999px;padding:10px 14px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+    📦 favorites確認
+    </button>
+    <script>
+    document.getElementById("showLocalStorageBtn").addEventListener("click",()=>{
+      alert("favorites の中身: " + localStorage.getItem("favorites"));
+    });
+    </script>
+    
 </body>
 </html>
