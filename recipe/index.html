@@ -89,6 +89,7 @@
     }
   }
   let favorites = loadFavorites();
+console.log("🔍 favorites初期値:", favorites, "typeof=", typeof favorites);
 
   function saveFavorites() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
