@@ -47,7 +47,7 @@
 <body>
   <header>
     <h1>🍳 レシピメモ</h1>
-    <div class="version">ver: 2025-10-12b (favorites_v2)</div>
+    <div class="version">ver: 2025-10-12c (favorites_v2_safari_fix)</div>
     <div class="popular-tags" id="popularTags"></div>
   </header>
 
@@ -67,7 +67,6 @@
   // 設定
   // =============================
   const RECIPES_JSON = "recipes.json";
-
   const recipeGrid = document.getElementById("recipeGrid");
   const searchInput = document.getElementById("search");
   const sortSelect = document.getElementById("sort");
@@ -76,28 +75,45 @@
   let recipes = [];
 
   // =============================
-  // ✅ お気に入り（v2: 安定版）
+  // ✅ お気に入り（v2_safari_fix）
   // =============================
   function loadFavorites() {
     try {
       const raw = localStorage.getItem("favorites_v2");
-      const parsed = raw ? JSON.parse(raw) : {};
-      if (typeof parsed !== "object" || Array.isArray(parsed)) return {};
+
+      // Safariバグ・文字列保存対策
+      if (!raw || raw === "null" || raw === "\"null\"" || raw === "undefined" || raw === "\"undefined\"") {
+        console.warn("favorites_v2: 初期化（不正値）", raw);
+        localStorage.removeItem("favorites_v2");
+        return {};
+      }
+
+      const parsed = JSON.parse(raw);
+
+      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+        console.warn("favorites_v2: 不正構造。再初期化", parsed);
+        localStorage.removeItem("favorites_v2");
+        return {};
+      }
+
       return parsed;
     } catch (e) {
-      console.warn("favorites_v2読み込みエラー:", e);
+      console.warn("favorites_v2 読み込みエラー:", e);
+      localStorage.removeItem("favorites_v2");
       return {};
     }
   }
+
   function saveFavorites(obj) {
     try {
       localStorage.setItem("favorites_v2", JSON.stringify(obj));
     } catch (e) {
-      console.warn("favorites_v2保存エラー:", e);
+      console.warn("favorites_v2 保存エラー:", e);
     }
   }
 
   let favorites = loadFavorites();
+  alert("📦 favorites_v2内容: " + JSON.stringify(favorites));
 
   function toggleFavorite(name) {
     if (favorites[name]) {
@@ -198,7 +214,6 @@
         </div>
       `;
 
-      // --- イベント設定 ---
       card.querySelector("img").addEventListener("click", () => {
         window.open(r.url || "#", "_blank");
         r.clicks = (r.clicks || 0) + 1;
