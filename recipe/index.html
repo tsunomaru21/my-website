@@ -8,7 +8,7 @@
     body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f9fafb;color:#333}
     header{background:#ff7043;color:#fff;text-align:center;padding:1.2rem 0;position:sticky;top:0;z-index:10}
     header h1{margin:0;font-size:1.4rem}
-    header .version{font-size:0.8rem;opacity:0.8;margin-top:0.3rem}
+    header .version{font-size:0.8rem;opacity:0.9;margin-top:0.3rem}
     .popular-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:0.4rem;margin-top:0.6rem}
     .popular-tag{background:rgba(255,255,255,0.25);color:#fff;padding:0.25rem 0.6rem;border-radius:999px;cursor:pointer}
     .controls{text-align:center;margin:1rem 0}
@@ -37,17 +37,34 @@
     .tags{display:flex;flex-wrap:wrap;gap:0.3rem}
     .tag{background:#eee;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.8rem;cursor:pointer}
     .favorite-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border-radius:50%;padding:6px;cursor:pointer;font-size:16px;line-height:1;user-select:none}
-    .favorite-btn.favorited{color:#ff4081}
+    .favorite-btn[data-favorited="true"]{color:#ff4081}
     @media(max-width:600px){
       .recipe-card img{height:110px}
       .favorite-btn{top:6px;right:6px;font-size:14px;padding:5px}
     }
+
+    /* デバッグパネル（表示が不要なら下部スクリプトで非表示にできます） */
+    #debugPanel {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 9999;
+      max-width: 220px;
+      box-sizing: border-box;
+    }
+    #debugPanel button { margin-left:6px; font-size:12px; padding:4px 6px; border-radius:6px; border:none; cursor:pointer; }
+    #debugData { margin-top:6px; white-space:pre-wrap; font-size:11px; max-height:180px; overflow:auto; background:rgba(255,255,255,0.06); padding:6px; border-radius:6px; }
   </style>
 </head>
 <body>
   <header>
     <h1>🍳 レシピメモ</h1>
-    <div class="version">ver: 2025-10-12c (favorites_v2_safari_fix)</div>
+    <div class="version">ver: 2025-10-12c2 (favorites_v2_robust)</div>
     <div class="popular-tags" id="popularTags"></div>
   </header>
 
@@ -62,6 +79,16 @@
 
   <div class="grid" id="recipeGrid"></div>
 
+  <!-- デバッグパネル（検証後はこのブロックごと削除してOK） -->
+  <div id="debugPanel" aria-hidden="false">
+    <div>
+      <strong>DEBUG favorites_v2</strong>
+      <button id="dbgRefresh">更新</button>
+      <button id="dbgClear" title="完全クリア">クリア</button>
+    </div>
+    <div id="debugData">{}</div>
+  </div>
+
   <script>
   // =============================
   // 設定
@@ -75,62 +102,84 @@
   let recipes = [];
 
   // =============================
-  // ✅ お気に入り（v2_safari_fix）
+  // Robust favorites_v2 implementation
+  // - uses Object.create(null) to avoid prototype surprises
+  // - validates and sanitizes stored data on load
   // =============================
-  function loadFavorites() {
+  function createEmptyFavoritesObj() {
+    return Object.create(null);
+  }
+
+  function loadFavoritesV2() {
     try {
       const raw = localStorage.getItem("favorites_v2");
 
-      // Safariバグ・文字列保存対策
+      // early checks for common broken values (string "null", etc)
       if (!raw || raw === "null" || raw === "\"null\"" || raw === "undefined" || raw === "\"undefined\"") {
-        console.warn("favorites_v2: 初期化（不正値）", raw);
+        // ensure clean state
         localStorage.removeItem("favorites_v2");
-        return {};
+        return createEmptyFavoritesObj();
       }
 
+      // parse
       const parsed = JSON.parse(raw);
 
-      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-        console.warn("favorites_v2: 不正構造。再初期化", parsed);
+      // must be plain object (not array, not null)
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         localStorage.removeItem("favorites_v2");
-        return {};
+        return createEmptyFavoritesObj();
       }
 
-      return parsed;
+      // create proto-less object and copy only string keys
+      const out = createEmptyFavoritesObj();
+      Object.keys(parsed).forEach(k => {
+        if (typeof k === "string" && (parsed[k] === true || parsed[k] === 1 || parsed[k] === "1")) {
+          out[k] = true;
+        } else if (typeof k === "string" && parsed[k]) {
+          // if truthy non-boolean, still accept
+          out[k] = true;
+        }
+      });
+      return out;
     } catch (e) {
-      console.warn("favorites_v2 読み込みエラー:", e);
+      console.warn("favorites_v2 load error:", e);
       localStorage.removeItem("favorites_v2");
-      return {};
+      return createEmptyFavoritesObj();
     }
   }
 
-  function saveFavorites(obj) {
+  function saveFavoritesV2(obj) {
     try {
+      // serialize plain object (no prototype)
       localStorage.setItem("favorites_v2", JSON.stringify(obj));
     } catch (e) {
-      console.warn("favorites_v2 保存エラー:", e);
+      console.warn("favorites_v2 save error:", e);
     }
   }
 
-  let favorites = loadFavorites();
-  alert("📦 favorites_v2内容: " + JSON.stringify(favorites));
+  // initialize
+  let favorites = loadFavoritesV2();
+
+  // helper: strict own-property check
+  function hasFavorite(name) {
+    return Object.prototype.hasOwnProperty.call(favorites, name);
+  }
 
   function toggleFavorite(name) {
-    if (favorites[name]) {
+    if (hasFavorite(name)) {
       delete favorites[name];
     } else {
       favorites[name] = true;
     }
-    saveFavorites(favorites);
-    renderRecipes();
-  }
-
-  function isFavorite(name) {
-    return !!favorites[name];
+    saveFavoritesV2(favorites);
+    refreshDebugPanel();
+    // only re-render ordering if default sort is selected (preserve user's selected sort)
+    if (sortSelect.value === "default") renderRecipes();
+    else renderRecipes(); // still re-render to update icons; keep simple
   }
 
   // =============================
-  // タグ・履歴関連
+  // tag / recent (unchanged)
   // =============================
   function loadTagUsage() {
     try {
@@ -163,7 +212,7 @@
   }
 
   // =============================
-  // JSON 読み込み
+  // JSON load and initial render
   // =============================
   fetch(RECIPES_JSON)
     .then(r => r.json())
@@ -171,11 +220,12 @@
       recipes = data;
       renderRecipes();
       renderPopularTags();
+      refreshDebugPanel();
     })
     .catch(err => console.error("recipes.json 読み込みエラー:", err));
 
   // =============================
-  // レシピ描画
+  // render
   // =============================
   function renderRecipes() {
     const q = (searchInput.value || "").trim().toLowerCase();
@@ -192,8 +242,8 @@
       list.sort((a,b) => ((b.clicks||0) - (a.clicks||0)));
     } else {
       list.sort((a,b) => {
-        const fa = isFavorite(a.name);
-        const fb = isFavorite(b.name);
+        const fa = hasFavorite(a.name);
+        const fb = hasFavorite(b.name);
         return fa === fb ? 0 : (fa ? -1 : 1);
       });
     }
@@ -204,9 +254,11 @@
       card.className = "recipe-card";
       card.dataset.name = r.name;
 
-      const favClass = isFavorite(r.name) ? "favorited" : "";
+      const favNow = hasFavorite(r.name);
+      const favAttr = favNow ? 'data-favorited="true"' : 'data-favorited="false"';
+
       card.innerHTML = `
-        <div class="favorite-btn ${favClass}" data-name="${escapeHtml(r.name)}">❤</div>
+        <div class="favorite-btn" ${favAttr} data-name="${escapeHtml(r.name)}">❤</div>
         <img src="${escapeAttr(r.image || '')}" alt="${escapeAttr(r.name)}">
         <div class="recipe-info">
           <div class="recipe-title">${escapeHtml(r.name)}</div>
@@ -214,16 +266,22 @@
         </div>
       `;
 
-      card.querySelector("img").addEventListener("click", () => {
+      // events
+      const imgEl = card.querySelector("img");
+      imgEl.addEventListener("click", () => {
         window.open(r.url || "#", "_blank");
         r.clicks = (r.clicks || 0) + 1;
         recentViews = [r.name, ...recentViews.filter(n => n !== r.name)].slice(0,10);
         saveRecentViews();
       });
 
-      card.querySelector(".favorite-btn").addEventListener("click", (e) => {
+      const favBtn = card.querySelector(".favorite-btn");
+      favBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         toggleFavorite(r.name);
+        // update attribute immediately for visual feedback
+        if (hasFavorite(r.name)) favBtn.setAttribute("data-favorited","true");
+        else favBtn.setAttribute("data-favorited","false");
       });
 
       card.querySelectorAll(".tag").forEach(tagEl => {
@@ -243,7 +301,7 @@
   }
 
   // =============================
-  // タグ人気処理
+  // tags
   // =============================
   function incrementTagUsage(tag) {
     tagUsage[tag] = (tagUsage[tag]||0) + 1;
@@ -265,13 +323,39 @@
   }
 
   // =============================
-  // 共通関数
+  // UI helpers & events
   // =============================
   searchInput.addEventListener("input", () => renderRecipes());
   sortSelect.addEventListener("change", () => renderRecipes());
 
   function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function escapeAttr(s){ return escapeHtml(s||''); }
+
+  // =============================
+  // Debug panel functions
+  // =============================
+  const debugDataEl = document.getElementById("debugData");
+  function refreshDebugPanel(){
+    try {
+      const raw = localStorage.getItem("favorites_v2");
+      const pretty = raw ? JSON.stringify(JSON.parse(raw), null, 2) : "{}";
+      debugDataEl.textContent = pretty;
+    } catch(e) {
+      debugDataEl.textContent = String(localStorage.getItem("favorites_v2"));
+    }
+  }
+  document.getElementById("dbgRefresh").addEventListener("click", ()=>{ refreshDebugPanel(); alert("refreshed"); });
+  document.getElementById("dbgClear").addEventListener("click", ()=>{
+    localStorage.removeItem("favorites_v2");
+    favorites = createEmptyFavoritesObj();
+    saveFavoritesV2(favorites);
+    refreshDebugPanel();
+    renderRecipes();
+    alert("favorites_v2 cleared");
+  });
+
+  // auto-refresh initially
+  refreshDebugPanel();
 
   </script>
 
