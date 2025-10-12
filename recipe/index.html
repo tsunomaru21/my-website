@@ -12,7 +12,8 @@
     .popular-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:0.4rem;margin-top:0.6rem}
     .popular-tag{background:rgba(255,255,255,0.25);color:#fff;padding:0.25rem 0.6rem;border-radius:999px;cursor:pointer}
     .controls{text-align:center;margin:1rem 0}
-    input[type="text"],select{padding:0.45rem;border-radius:8px;border:1px solid #ccc;margin:0.4rem;font-size:1rem}
+    input[type="text"],select,button{padding:0.45rem;border-radius:8px;border:1px solid #ccc;margin:0.4rem;font-size:1rem}
+    #clearSearchBtn{display:none;background:#ddd;cursor:pointer}
     .grid{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
@@ -46,20 +47,21 @@
     @media(max-width:600px){
       .recipe-card img{height:110px}
       .favorite-btn{top:6px;right:6px;font-size:14px;padding:5px}
+      .controls{display:flex;flex-wrap:wrap;justify-content:center}
+      #clearSearchBtn{font-size:0.9rem;padding:0.35rem 0.6rem}
     }
-
-    #resetStorageBtn{position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
   </style>
 </head>
 <body>
   <header>
     <h1>🍳 レシピメモ</h1>
-    <div class="version">ver: 2025-10-12-idbased</div>
+    <div class="version">ver: 2025-10-12-idbased-v2</div>
     <div class="popular-tags" id="popularTags"></div>
   </header>
 
   <div class="controls">
     <input id="search" type="text" placeholder="レシピ名・材料で検索" />
+    <button id="clearSearchBtn">❌ クリア</button>
     <select id="sort">
       <option value="default">デフォルト</option>
       <option value="popular">人気順</option>
@@ -75,21 +77,14 @@
   const searchInput = document.getElementById("search");
   const sortSelect = document.getElementById("sort");
   const popularTagsEl = document.getElementById("popularTags");
+  const clearSearchBtn = document.getElementById("clearSearchBtn");
 
   // ------------------------
   // ユーティリティ
   // ------------------------
   function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
-  // ------------------------
-  // LocalStorageユーティリティ
-  // ------------------------
-  function safeGet(key, fallback){
-    try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; }
-  }
-  function safeSet(key, value){
-    try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
-  }
+  function safeGet(key, fallback){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
+  function safeSet(key, value){ try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){} }
 
   // ------------------------
   // タグ・閲覧履歴
@@ -105,7 +100,6 @@
   // ------------------------
   const FAVORITES_KEY = "favorites_v4_id";
   let favoritesById = safeGet(FAVORITES_KEY, {});
-
   function isFavoriteById(id){ return !!favoritesById[id]; }
   function toggleFavoriteById(id){
     if(!id) return;
@@ -116,7 +110,7 @@
   }
 
   // ------------------------
-  // マイグレーション（旧データ救出）
+  // マイグレーション
   // ------------------------
   function loadLegacyFavorites(){
     const keys = ["favorites_v3","favorites_v2","favorites"];
@@ -126,10 +120,10 @@
         if(!raw) continue;
         const parsed = JSON.parse(raw);
         if(typeof parsed === "object"){
-          const names = Array.isArray(parsed) ? parsed : Object.keys(parsed);
-          names.forEach(n => {
-            const r = recipes.find(x => x.name === n);
-            if(r && r.id) favoritesById[r.id] = true;
+          const names = Array.isArray(parsed)?parsed:Object.keys(parsed);
+          names.forEach(n=>{
+            const r=recipes.find(x=>x.name===n);
+            if(r&&r.id) favoritesById[r.id]=true;
           });
         }
       }catch(e){}
@@ -140,13 +134,13 @@
   function migrateRecentViews(){
     try{
       const old = safeGet("recentViews", []);
-      if(!old || !old.length) return;
-      const mapped = [];
+      if(!old||!old.length) return;
+      const mapped=[];
       old.forEach(n=>{
-        const r = recipes.find(x => x.name === n);
-        if(r && r.id && !mapped.includes(r.id)) mapped.push(r.id);
+        const r=recipes.find(x=>x.name===n);
+        if(r&&r.id&&!mapped.includes(r.id)) mapped.push(r.id);
       });
-      recentViewsById = mapped.slice(0,10);
+      recentViewsById=mapped.slice(0,10);
       saveRecentViewsById();
     }catch(e){}
   }
@@ -154,12 +148,11 @@
   // ------------------------
   // データロード
   // ------------------------
-  let recipes = [];
-
+  let recipes=[];
   fetch(RECIPES_JSON)
     .then(r=>r.json())
     .then(data=>{
-      recipes = Array.isArray(data)?data:[];
+      recipes=Array.isArray(data)?data:[];
       loadLegacyFavorites();
       migrateRecentViews();
       renderRecipes();
@@ -172,15 +165,15 @@
   // ------------------------
   function renderRecipes(){
     favoritesById = safeGet(FAVORITES_KEY,{});
-    const q = (searchInput.value||"").trim().toLowerCase();
+    const q=(searchInput.value||"").trim().toLowerCase();
 
-    let list = recipes.filter(r=>{
-      const nOk = r.name && r.name.toLowerCase().includes(q);
-      const tOk = Array.isArray(r.tags) && r.tags.some(t=>t.toLowerCase().includes(q));
-      return q==="" ? true : (nOk||tOk);
+    let list=recipes.filter(r=>{
+      const nOk=r.name&&r.name.toLowerCase().includes(q);
+      const tOk=Array.isArray(r.tags)&&r.tags.some(t=>t.toLowerCase().includes(q));
+      return q===""?true:(nOk||tOk);
     });
 
-    const sortType = sortSelect.value;
+    const sortType=sortSelect.value;
     if(sortType==="recent"){
       list.sort((a,b)=>recentViewsById.indexOf(b.id)-recentViewsById.indexOf(a.id));
     }else if(sortType==="popular"){
@@ -202,7 +195,6 @@
       favBtn.className="favorite-btn";
       favBtn.textContent=isFavoriteById(r.id)?"❤":"♡";
       if(isFavoriteById(r.id)) favBtn.classList.add("favorited");
-
       const favHandler=(e)=>{
         e.stopPropagation(); e.preventDefault();
         toggleFavoriteById(r.id);
@@ -234,9 +226,16 @@
           span.className="tag"; span.textContent=t;
           span.addEventListener("click",(e)=>{
             e.stopPropagation();
-            searchInput.value=t;
-            tagUsage[t]=(tagUsage[t]||0)+1;
-            saveTagUsage(); renderPopularTags(); renderRecipes();
+            // 🔸 同じタグをクリックしたら解除
+            if(searchInput.value===t){
+              searchInput.value="";
+            }else{
+              searchInput.value=t;
+              tagUsage[t]=(tagUsage[t]||0)+1;
+              saveTagUsage();
+            }
+            updateClearButtonVisibility();
+            renderPopularTags(); renderRecipes();
           });
           tagsWrap.appendChild(span);
         });
@@ -257,30 +256,39 @@
     popularTagsEl.querySelectorAll(".popular-tag").forEach(btn=>{
       btn.addEventListener("click",()=>{
         const tag=btn.textContent;
-        searchInput.value=tag;
-        tagUsage[tag]=(tagUsage[tag]||0)+1;
-        saveTagUsage(); renderPopularTags(); renderRecipes();
+        // 🔸 同じタグクリックで解除
+        if(searchInput.value===tag){
+          searchInput.value="";
+        }else{
+          searchInput.value=tag;
+          tagUsage[tag]=(tagUsage[tag]||0)+1;
+          saveTagUsage();
+        }
+        updateClearButtonVisibility();
+        renderPopularTags(); renderRecipes();
       });
     });
   }
 
-  searchInput.addEventListener("input",()=>renderRecipes());
-  sortSelect.addEventListener("change",()=>renderRecipes());
+  // ------------------------
+  // 検索欄とクリアボタン
+  // ------------------------
+  function updateClearButtonVisibility(){
+    clearSearchBtn.style.display = searchInput.value.trim() ? "inline-block" : "none";
+  }
 
-  // ------------------------
-  // リセット
-  // ------------------------
-  const resetBtn=document.createElement("button");
-  resetBtn.id="resetStorageBtn";
-  resetBtn.textContent="🧹 リセット";
-  resetBtn.addEventListener("click",()=>{
-    ["favorites_v4_id","favorites_v3","favorites_v2","favorites","tagUsage","recentViews_v2_id","recentViews"].forEach(k=>{
-      try{localStorage.removeItem(k);}catch(e){}
-    });
-    alert("localStorageを初期化しました。再読み込みします。");
-    location.reload();
+  searchInput.addEventListener("input",()=>{
+    updateClearButtonVisibility();
+    renderRecipes();
   });
-  document.body.appendChild(resetBtn);
+
+  clearSearchBtn.addEventListener("click",()=>{
+    searchInput.value="";
+    updateClearButtonVisibility();
+    renderRecipes();
+  });
+
+  sortSelect.addEventListener("change",()=>renderRecipes());
   </script>
 </body>
 </html>
