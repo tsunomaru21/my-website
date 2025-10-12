@@ -102,6 +102,12 @@
       color: #005bb5;
       padding: 0.2rem 0.5rem;
       border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .recipe-tags span:hover {
+      background: #cde0ff;
     }
 
     /* ❤️ お気に入りボタン */
@@ -194,7 +200,6 @@
 
       let renderList = [...list];
 
-      // 🧡 デフォルトのときだけお気に入りを上にする
       if (currentSort === "default") {
         renderList.sort((a, b) => {
           const aFav = favorites.includes(a.name);
@@ -246,6 +251,14 @@
           recipe.tags.forEach(tag => {
             const span = document.createElement("span");
             span.textContent = tag;
+
+            // 🌟 タグをクリック → タグ検索
+            span.addEventListener("click", (e) => {
+              e.stopPropagation();
+              document.getElementById("searchInput").value = tag;
+              filterRecipesByQuery(tag);
+            });
+
             tags.appendChild(span);
           });
         }
@@ -270,14 +283,19 @@
       });
     }
 
-    // 🔍 検索
-    document.getElementById("searchInput").addEventListener("input", e => {
-      const query = e.target.value.toLowerCase();
+    // 🔍 共通の検索関数
+    function filterRecipesByQuery(query) {
+      const q = query.toLowerCase();
       const filtered = recipes.filter(r =>
-        r.name.toLowerCase().includes(query) ||
-        (r.tags && r.tags.some(tag => tag.toLowerCase().includes(query)))
+        r.name.toLowerCase().includes(q) ||
+        (r.tags && r.tags.some(tag => tag.toLowerCase().includes(q)))
       );
       renderRecipes(filtered);
+    }
+
+    // 🔍 検索ボックス入力時
+    document.getElementById("searchInput").addEventListener("input", e => {
+      filterRecipesByQuery(e.target.value);
     });
 
     // ⬇️ ソート
