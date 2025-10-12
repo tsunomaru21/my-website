@@ -54,13 +54,13 @@
     }
 
     .recipe-card {
+      position: relative;
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      position: relative; /* ★ お気に入りアイコン配置用 */
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
@@ -106,34 +106,50 @@
       border-radius: 8px;
     }
 
+    /* ❤️ お気に入りボタン */
+    .favorite-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      color: #999;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: color 0.2s, background 0.2s, transform 0.2s;
+    }
+
+    .favorite-btn:hover {
+      background: #ffeef0;
+      transform: scale(1.1);
+    }
+
+    .favorite-btn.active {
+      color: #e0245e;
+    }
+
+    @media (max-width: 600px) {
+      .favorite-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+        top: 6px;
+        right: 6px;
+      }
+    }
+
     footer {
       text-align: center;
       padding: 1rem;
       color: #777;
       font-size: 0.8rem;
-    }
-
-    /* ★ お気に入りアイコン */
-    .favorite-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255,255,255,0.85);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      font-size: 18px;
-      line-height: 32px;
-      text-align: center;
-      transition: background 0.2s;
-    }
-    .favorite-btn:hover {
-      background: rgba(255,255,255,1);
-    }
-    .favorite-btn.active {
-      color: #e63946;
     }
   </style>
 </head>
@@ -148,12 +164,14 @@
       <option value="default">並び順：デフォルト</option>
       <option value="popular">人気順（クリック回数）</option>
       <option value="recent">最近見た順</option>
-      <option value="favorite">お気に入りのみ</option> <!-- ★ 追加 -->
+      <option value="favorite">お気に入り</option>
     </select>
   </section>
 
   <main>
-    <div class="recipes" id="recipeList"></div>
+    <div class="recipes" id="recipeList">
+      <!-- JSでレシピカードを生成 -->
+    </div>
   </main>
 
   <footer>
@@ -164,9 +182,9 @@
     let recipes = [];
     let clickCounts = JSON.parse(localStorage.getItem("recipeClicks") || "{}");
     let recentViewed = JSON.parse(localStorage.getItem("recentRecipes") || "[]");
-    let favorites = JSON.parse(localStorage.getItem("favorites") || "[]"); // ★ 追加
+    let favorites = JSON.parse(localStorage.getItem("favoriteRecipes") || "[]");
 
-    // JSONを読み込んで描画
+    // JSON読み込み
     fetch("recipes.json")
       .then(response => response.json())
       .then(data => {
@@ -182,13 +200,17 @@
         const card = document.createElement("div");
         card.className = "recipe-card";
 
-        // ★ お気に入りボタン追加
+        const img = document.createElement("img");
+        img.src = recipe.image || "images/noimage_thumb.jpg";
+        img.alt = recipe.name;
+        img.className = "recipe-thumb";
+
         const favBtn = document.createElement("button");
         favBtn.className = "favorite-btn";
         favBtn.innerHTML = favorites.includes(recipe.name) ? "❤️" : "🤍";
         if (favorites.includes(recipe.name)) favBtn.classList.add("active");
 
-        favBtn.addEventListener("click", e => {
+        favBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           e.preventDefault();
 
@@ -197,18 +219,14 @@
           } else {
             favorites.push(recipe.name);
           }
-          localStorage.setItem("favorites", JSON.stringify(favorites));
-          renderRecipes(list); // 再描画
+
+          localStorage.setItem("favoriteRecipes", JSON.stringify(favorites));
+          renderRecipes(recipes); // 再描画
         });
 
         const link = document.createElement("a");
         link.href = recipe.url || "#";
         link.target = "_blank";
-
-        const img = document.createElement("img");
-        img.src = recipe.image || "images/noimage_thumb.jpg";
-        img.alt = recipe.name;
-        img.className = "recipe-thumb";
 
         const info = document.createElement("div");
         info.className = "recipe-info";
@@ -227,7 +245,16 @@
           });
         }
 
-        // クリックカウント
+        info.appendChild(title);
+        info.appendChild(tags);
+
+        link.appendChild(img);
+        link.appendChild(info);
+        card.appendChild(link);
+        card.appendChild(favBtn);
+        container.appendChild(card);
+
+        // クリックカウント・閲覧履歴
         link.addEventListener("click", () => {
           clickCounts[recipe.name] = (clickCounts[recipe.name] || 0) + 1;
           localStorage.setItem("recipeClicks", JSON.stringify(clickCounts));
@@ -237,14 +264,6 @@
           recentViewed = recentViewed.slice(0, 10);
           localStorage.setItem("recentRecipes", JSON.stringify(recentViewed));
         });
-
-        info.appendChild(title);
-        info.appendChild(tags);
-        link.appendChild(img);
-        link.appendChild(info);
-        card.appendChild(link);
-        card.appendChild(favBtn);
-        container.appendChild(card);
       });
     }
 
@@ -266,11 +285,9 @@
       if (value === "popular") {
         sorted.sort((a, b) => (clickCounts[b.name] || 0) - (clickCounts[a.name] || 0));
       } else if (value === "recent") {
-        sorted = recentViewed
-          .map(name => recipes.find(r => r.name === name))
-          .filter(Boolean);
-      } else if (value === "favorite") { // ★ お気に入りのみ
-        sorted = recipes.filter(r => favorites.includes(r.name));
+        sorted = recentViewed.map(name => recipes.find(r => r.name === name)).filter(Boolean);
+      } else if (value === "favorite") {
+        sorted = favorites.map(name => recipes.find(r => r.name === name)).filter(Boolean);
       }
 
       renderRecipes(sorted);
