@@ -13,23 +13,23 @@
     .controls{text-align:center;margin:1rem 0}
     input[type="text"],select{padding:0.45rem;border-radius:8px;border:1px solid #ccc;margin:0.4rem;font-size:1rem}
     .grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:1rem;
-  padding:1rem;
-  max-width:1100px;
-  margin:0 auto;
-}
-.recipe-card{
-  background:#fff;
-  border-radius:12px;
-  overflow:hidden;
-  box-shadow:0 3px 8px rgba(0,0,0,0.08);
-  position:relative;
-  cursor:default;
-  width:100%;
-  box-sizing:border-box;
-}
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:1rem;
+      padding:1rem;
+      max-width:1100px;
+      margin:0 auto;
+    }
+    .recipe-card{
+      background:#fff;
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 3px 8px rgba(0,0,0,0.08);
+      position:relative;
+      cursor:default;
+      width:100%;
+      box-sizing:border-box;
+    }
     .recipe-card img{width:100%;height:130px;object-fit:cover;display:block}
     .recipe-info{padding:0.75rem}
     .recipe-title{font-weight:700;margin:0 0 0.5rem}
@@ -37,7 +37,10 @@
     .tag{background:#eee;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.8rem;cursor:pointer}
     .favorite-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border-radius:50%;padding:6px;cursor:pointer;font-size:16px;line-height:1;user-select:none}
     .favorite-btn.favorited{color:#ff4081}
-    @media(max-width:600px){.recipe-card img{height:110px}.favorite-btn{top:6px;right:6px;font-size:14px;padding:5px}}
+    @media(max-width:600px){
+      .recipe-card img{height:110px}
+      .favorite-btn{top:6px;right:6px;font-size:14px;padding:5px}
+    }
   </style>
 </head>
 <body>
@@ -48,14 +51,18 @@
 
   <div class="controls">
     <input id="search" type="text" placeholder="レシピ名・材料で検索" />
-    <select id="sort"><option value="default">デフォルト</option><option value="popular">人気順</option><option value="recent">最近見た順</option></select>
+    <select id="sort">
+      <option value="default">デフォルト</option>
+      <option value="popular">人気順</option>
+      <option value="recent">最近見た順</option>
+    </select>
   </div>
 
   <div class="grid" id="recipeGrid"></div>
 
   <script>
   // --- 設定 ---
-  const RECIPES_JSON = "recipes.json"; // 既存の JSON パス
+  const RECIPES_JSON = "recipes.json"; // JSONパス
 
   // --- DOM ---
   const recipeGrid = document.getElementById("recipeGrid");
@@ -63,37 +70,28 @@
   const sortSelect = document.getElementById("sort");
   const popularTagsEl = document.getElementById("popularTags");
 
-  // --- 状態（安全に初期化） ---
+  // --- 状態管理 ---
   let recipes = [];
-  // favorites を Set で扱う（型のずれに強い）
+
+  // --- localStorage対応（SetではなくArrayで安定） ---
   function loadFavorites() {
-  try {
-    const raw = localStorage.getItem("favorites");
-
-    // localStorageが空または不正な形式の場合
-    if (!raw || raw === "undefined" || raw === "null") return new Set();
-
-    const parsed = JSON.parse(raw);
-
-    // 想定外の形式が入っていた場合に強制リセット
-    if (!Array.isArray(parsed)) {
-      console.warn("favorites形式不正のため初期化:", parsed);
+    try {
+      const raw = localStorage.getItem("favorites");
+      if (!raw || raw === "undefined" || raw === "null") return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.warn("favorites読み込みエラー:", e);
       localStorage.removeItem("favorites");
-      return new Set();
+      return [];
     }
-
-    // 有効な文字列のみフィルタ
-    const cleaned = parsed.filter(v => typeof v === "string" && v.trim() !== "");
-    return new Set(cleaned);
-
-  } catch (e) {
-    console.warn("favorites読み込みエラー:", e);
-    localStorage.removeItem("favorites");
-    return new Set();
   }
-}
-let favorites = loadFavorites(); // Set
-  // tagUsage はオブジェクト（tag -> count）
+  let favorites = loadFavorites();
+
+  function saveFavorites() {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }
+
   function loadTagUsage() {
     try {
       const raw = localStorage.getItem("tagUsage");
@@ -116,10 +114,6 @@ let favorites = loadFavorites(); // Set
   }
   let recentViews = loadRecentViews();
 
-  // --- ユーティリティ ---
-  function saveFavorites() {
-    localStorage.setItem("favorites", JSON.stringify(Array.from(favorites)));
-  }
   function saveTagUsage() {
     localStorage.setItem("tagUsage", JSON.stringify(tagUsage));
   }
@@ -146,12 +140,11 @@ let favorites = loadFavorites(); // Set
     if (sortType === "recent") {
       list.sort((a,b) => (recentViews.indexOf(b.name) - recentViews.indexOf(a.name)));
     } else if (sortType === "popular") {
-      list.sort((a,b) => ( (b.clicks||0) - (a.clicks||0) ));
+      list.sort((a,b) => ((b.clicks||0) - (a.clicks||0)));
     } else {
-      // default: favorites on top, others preserve original relative order
       list.sort((a,b) => {
-        const fa = favorites.has(a.name);
-        const fb = favorites.has(b.name);
+        const fa = favorites.includes(a.name);
+        const fb = favorites.includes(b.name);
         return fa === fb ? 0 : (fa ? -1 : 1);
       });
     }
@@ -160,11 +153,9 @@ let favorites = loadFavorites(); // Set
     list.forEach(r => {
       const card = document.createElement("div");
       card.className = "recipe-card";
-      // set data-name so handlers can reference safely
       card.dataset.name = r.name;
 
-      // build inner
-      const favClass = favorites.has(r.name) ? "favorited" : "";
+      const favClass = favorites.includes(r.name) ? "favorited" : "";
       card.innerHTML = `
         <div class="favorite-btn ${favClass}" data-name="${escapeHtml(r.name)}">❤</div>
         <img src="${escapeAttr(r.image || '')}" alt="${escapeAttr(r.name)}">
@@ -174,38 +165,38 @@ let favorites = loadFavorites(); // Set
         </div>
       `;
 
-      // img click -> open detail in new tab
       const img = card.querySelector("img");
       img.addEventListener("click", (e) => {
         window.open(r.url || "#", "_blank");
         r.clicks = (r.clicks || 0) + 1;
-        // record recent
         recentViews = [r.name, ...recentViews.filter(n => n !== r.name)].slice(0,10);
         saveRecentViews();
       });
 
-      // favorite button: stop propagation and toggle
       const favBtn = card.querySelector(".favorite-btn");
       favBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         const name = r.name;
-        if (favorites.has(name)) { favorites.delete(name); favBtn.classList.remove("favorited"); }
-        else { favorites.add(name); favBtn.classList.add("favorited"); }
+        if (favorites.includes(name)) {
+          favorites = favorites.filter(f => f !== name);
+          favBtn.classList.remove("favorited");
+        } else {
+          favorites.push(name);
+          favBtn.classList.add("favorited");
+        }
         saveFavorites();
-        // only reorder when default sort
         if (sortSelect.value === "default") renderRecipes();
       });
 
-      // tags: stop propagation, set search input and filter, increment tagUsage
       card.querySelectorAll(".tag").forEach(tagEl => {
         tagEl.addEventListener("click", (e) => {
-          e.stopPropagation(); // ← 重要：親要素への伝播を停止
+          e.stopPropagation();
           const tagText = tagEl.textContent;
           searchInput.value = tagText;
           incrementTagUsage(tagText);
           saveTagUsage();
           renderPopularTags();
-          renderRecipes(); // uses search input
+          renderRecipes();
         });
       });
 
@@ -236,11 +227,11 @@ let favorites = loadFavorites(); // Set
   searchInput.addEventListener("input", () => renderRecipes());
   sortSelect.addEventListener("change", () => renderRecipes());
 
-  // --- HTMLエスケープ（簡易） ---
+  // --- HTMLエスケープ ---
   function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function escapeAttr(s){ return escapeHtml(s||''); }
 
-  // --- 開発向け：localStorageを初期化する短い関数（任意に実行してリセット可） ---
+  // --- 開発用リセット ---
   window.__resetRecipeStorage = function(){
     localStorage.removeItem("favorites");
     localStorage.removeItem("tagUsage");
@@ -249,18 +240,17 @@ let favorites = loadFavorites(); // Set
   };
   </script>
 
-<button id="resetStorageBtn" style="position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+  <button id="resetStorageBtn" style="position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
     🧹 リセット
-    </button>
-    <script>
-    document.getElementById("resetStorageBtn").addEventListener("click",()=>{
-      localStorage.removeItem("favorites");
-      localStorage.removeItem("tagUsage");
-      localStorage.removeItem("recentViews");
-      alert("localStorageを初期化しました。ページを再読み込みします。");
-      location.reload();
-    });
-    </script>
-
+  </button>
+  <script>
+  document.getElementById("resetStorageBtn").addEventListener("click",()=>{
+    localStorage.removeItem("favorites");
+    localStorage.removeItem("tagUsage");
+    localStorage.removeItem("recentViews");
+    alert("localStorageを初期化しました。ページを再読み込みします。");
+    location.reload();
+  });
+  </script>
 </body>
 </html>
