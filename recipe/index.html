@@ -77,17 +77,18 @@
 
   // --- localStorage対応（SetではなくArrayで安定） ---
   function loadFavorites() {
-    try {
-      const raw = localStorage.getItem("favorites");
-      if (!raw || raw === "undefined" || raw === "null") return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      console.warn("favorites読み込みエラー:", e);
-      localStorage.removeItem("favorites");
-      return [];
-    }
+  try {
+    const raw = localStorage.getItem("favorites");
+    if (!raw || raw === "undefined" || raw === "null") return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed;
+  } catch (e) {
+    console.warn("favorites読み込みエラー:", e);
+    localStorage.removeItem("favorites");
+    return [];
   }
+}
   let favorites = loadFavorites();
 alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites")));
 // console.log("🔍 favorites初期値:", favorites, "typeof=", typeof favorites);
