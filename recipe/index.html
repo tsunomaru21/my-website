@@ -47,7 +47,7 @@
 <body>
   <header>
     <h1>🍳 レシピメモ</h1>
-    <div class="version">ver: 2025-10-12a</div>
+    <div class="version">ver: 2025-10-12b (favorites_v2)</div>
     <div class="popular-tags" id="popularTags"></div>
   </header>
 
@@ -63,40 +63,59 @@
   <div class="grid" id="recipeGrid"></div>
 
   <script>
-  // --- 設定 ---
-  const RECIPES_JSON = "recipes.json"; // JSONパス
+  // =============================
+  // 設定
+  // =============================
+  const RECIPES_JSON = "recipes.json";
 
-  // --- DOM ---
   const recipeGrid = document.getElementById("recipeGrid");
   const searchInput = document.getElementById("search");
   const sortSelect = document.getElementById("sort");
   const popularTagsEl = document.getElementById("popularTags");
 
-  // --- 状態管理 ---
   let recipes = [];
 
-  // --- localStorage対応（SetではなくArrayで安定） ---
+  // =============================
+  // ✅ お気に入り（v2: 安定版）
+  // =============================
   function loadFavorites() {
-  try {
-    const raw = localStorage.getItem("favorites");
-    if (!raw || raw === "undefined" || raw === "null") return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed;
-  } catch (e) {
-    console.warn("favorites読み込みエラー:", e);
-    localStorage.removeItem("favorites");
-    return [];
+    try {
+      const raw = localStorage.getItem("favorites_v2");
+      const parsed = raw ? JSON.parse(raw) : {};
+      if (typeof parsed !== "object" || Array.isArray(parsed)) return {};
+      return parsed;
+    } catch (e) {
+      console.warn("favorites_v2読み込みエラー:", e);
+      return {};
+    }
   }
-}
+  function saveFavorites(obj) {
+    try {
+      localStorage.setItem("favorites_v2", JSON.stringify(obj));
+    } catch (e) {
+      console.warn("favorites_v2保存エラー:", e);
+    }
+  }
+
   let favorites = loadFavorites();
-alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites")));
-// console.log("🔍 favorites初期値:", favorites, "typeof=", typeof favorites);
 
-  function saveFavorites() {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
+  function toggleFavorite(name) {
+    if (favorites[name]) {
+      delete favorites[name];
+    } else {
+      favorites[name] = true;
+    }
+    saveFavorites(favorites);
+    renderRecipes();
   }
 
+  function isFavorite(name) {
+    return !!favorites[name];
+  }
+
+  // =============================
+  // タグ・履歴関連
+  // =============================
   function loadTagUsage() {
     try {
       const raw = localStorage.getItem("tagUsage");
@@ -107,6 +126,10 @@ alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites"))
     }
   }
   let tagUsage = loadTagUsage();
+
+  function saveTagUsage() {
+    localStorage.setItem("tagUsage", JSON.stringify(tagUsage));
+  }
 
   function loadRecentViews() {
     try {
@@ -119,20 +142,25 @@ alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites"))
   }
   let recentViews = loadRecentViews();
 
-  function saveTagUsage() {
-    localStorage.setItem("tagUsage", JSON.stringify(tagUsage));
-  }
   function saveRecentViews() {
     localStorage.setItem("recentViews", JSON.stringify(recentViews));
   }
 
-  // --- JSON読み込み ---
+  // =============================
+  // JSON 読み込み
+  // =============================
   fetch(RECIPES_JSON)
     .then(r => r.json())
-    .then(data => { recipes = data; renderRecipes(); renderPopularTags(); })
-    .catch(err => { console.error("recipes.json 読み込みエラー:", err); });
+    .then(data => {
+      recipes = data;
+      renderRecipes();
+      renderPopularTags();
+    })
+    .catch(err => console.error("recipes.json 読み込みエラー:", err));
 
-  // --- 描画 ---
+  // =============================
+  // レシピ描画
+  // =============================
   function renderRecipes() {
     const q = (searchInput.value || "").trim().toLowerCase();
     let list = recipes.filter(r => {
@@ -148,8 +176,8 @@ alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites"))
       list.sort((a,b) => ((b.clicks||0) - (a.clicks||0)));
     } else {
       list.sort((a,b) => {
-        const fa = favorites.includes(a.name);
-        const fb = favorites.includes(b.name);
+        const fa = isFavorite(a.name);
+        const fb = isFavorite(b.name);
         return fa === fb ? 0 : (fa ? -1 : 1);
       });
     }
@@ -160,7 +188,7 @@ alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites"))
       card.className = "recipe-card";
       card.dataset.name = r.name;
 
-      const favClass = favorites.includes(r.name) ? "favorited" : "";
+      const favClass = isFavorite(r.name) ? "favorited" : "";
       card.innerHTML = `
         <div class="favorite-btn ${favClass}" data-name="${escapeHtml(r.name)}">❤</div>
         <img src="${escapeAttr(r.image || '')}" alt="${escapeAttr(r.name)}">
@@ -170,27 +198,17 @@ alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites"))
         </div>
       `;
 
-      const img = card.querySelector("img");
-      img.addEventListener("click", (e) => {
+      // --- イベント設定 ---
+      card.querySelector("img").addEventListener("click", () => {
         window.open(r.url || "#", "_blank");
         r.clicks = (r.clicks || 0) + 1;
         recentViews = [r.name, ...recentViews.filter(n => n !== r.name)].slice(0,10);
         saveRecentViews();
       });
 
-      const favBtn = card.querySelector(".favorite-btn");
-      favBtn.addEventListener("click", (e) => {
+      card.querySelector(".favorite-btn").addEventListener("click", (e) => {
         e.stopPropagation();
-        const name = r.name;
-        if (favorites.includes(name)) {
-          favorites = favorites.filter(f => f !== name);
-          favBtn.classList.remove("favorited");
-        } else {
-          favorites.push(name);
-          favBtn.classList.add("favorited");
-        }
-        saveFavorites();
-        if (sortSelect.value === "default") renderRecipes();
+        toggleFavorite(r.name);
       });
 
       card.querySelectorAll(".tag").forEach(tagEl => {
@@ -209,15 +227,18 @@ alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites"))
     });
   }
 
-  // --- タグ人気処理 ---
+  // =============================
+  // タグ人気処理
+  // =============================
   function incrementTagUsage(tag) {
     tagUsage[tag] = (tagUsage[tag]||0) + 1;
   }
+
   function renderPopularTags() {
     const entries = Object.entries(tagUsage).sort((a,b)=>b[1]-a[1]).slice(0,8);
     popularTagsEl.innerHTML = entries.map(([tag]) => `<button class="popular-tag">${escapeHtml(tag)}</button>`).join("");
     popularTagsEl.querySelectorAll(".popular-tag").forEach(btn=>{
-      btn.addEventListener("click", (e)=>{
+      btn.addEventListener("click", ()=>{
         const tag = btn.textContent;
         searchInput.value = tag;
         incrementTagUsage(tag);
@@ -228,58 +249,30 @@ alert("favoritesの中身: " + JSON.stringify(localStorage.getItem("favorites"))
     });
   }
 
-  // --- 検索・ソートイベント ---
+  // =============================
+  // 共通関数
+  // =============================
   searchInput.addEventListener("input", () => renderRecipes());
   sortSelect.addEventListener("change", () => renderRecipes());
 
-  // --- HTMLエスケープ ---
   function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function escapeAttr(s){ return escapeHtml(s||''); }
 
-  // --- 開発用リセット ---
-  window.__resetRecipeStorage = function(){
-    localStorage.removeItem("favorites");
-    localStorage.removeItem("tagUsage");
-    localStorage.removeItem("recentViews");
-    location.reload();
-  };
   </script>
 
-<button id="resetStorageBtn"
-style="position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-🧹 リセット
-</button>
-
-<script>
-document.getElementById("resetStorageBtn").addEventListener("click",()=>{
-  localStorage.clear();
-  alert("localStorageを完全初期化しました。ページを再読み込みします。");
-  location.href = location.pathname + "?v=" + Date.now(); // キャッシュ破棄つきリロード
-});
-</script>
-
-
-  <!-- <button id="resetStorageBtn" style="position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-    🧹 リセット
+  <!-- 🧹 完全リセット -->
+  <button id="resetStorageBtn"
+  style="position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+  🧹 リセット
   </button>
+
   <script>
   document.getElementById("resetStorageBtn").addEventListener("click",()=>{
-    localStorage.removeItem("favorites");
-    localStorage.removeItem("tagUsage");
-    localStorage.removeItem("recentViews");
-    alert("localStorageを初期化しました。ページを再読み込みします。");
-    location.reload();
+    localStorage.clear();
+    alert("localStorageを完全初期化しました。ページを再読み込みします。");
+    location.href = location.pathname + "?v=" + Date.now();
   });
-  </script> -->
+  </script>
 
-<button id="showLocalStorageBtn" style="position:fixed;bottom:60px;right:20px;z-index:999;background:#4caf50;color:#fff;border:none;border-radius:999px;padding:10px 14px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-    📦 favorites確認
-    </button>
-    <script>
-    document.getElementById("showLocalStorageBtn").addEventListener("click",()=>{
-      alert("favorites の中身: " + localStorage.getItem("favorites"));
-    });
-    </script>
-    
 </body>
 </html>
