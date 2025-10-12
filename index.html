@@ -1,29 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-PLM8NSWR');</script>
-  <!-- End Google Tag Manager -->
-<meta charset="UTF-8" />
-<meta name="description" content="recipe">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0">
-<link rel="stylesheet" href="recipe.css">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" href="icon.png" sizes="180x180">
-<title>個人用サイト</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Hobby Portal</title>
+  <style>
+    /* ベース設定 */
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      background-color: #f8f9fa;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #0078d7;
+      color: white;
+      width: 100%;
+      text-align: center;
+      padding: 2rem 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    .site-links {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin-top: 2rem;
+    }
+
+    .site-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: #333;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .site-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    footer {
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PLM8NSWR"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
-<h1>個人用サイト</h1>
-	<a href="recipe/index.html" target="_blank" > <img src="recipe.png" alt="レシピメモ" width="120" height="120"> </a>
-	<a href="drive/index.html" target="_blank" > <img src="drive.png" alt="お出かけ先メモ" width="120" height="120"> </a>
-	<a href="restaurant/index.html" target="_blank" > <img src="restaurant.png" alt="レストランメモ" width="120" height="120"> </a>
+  <header>
+    <h1>My_Website</h1>
+  </header>
+
+  <main>
+    <h2>サイト一覧</h2>
+    <div class="site-links">
+      <a href="recipe/" class="site-card">
+        <h3>🎮 recipe</h3>
+        <p>レシピメモ</p>
+      </a>
+      <a href="drive" class="site-card">
+        <h3>📷 drive</h3>
+        <p>行先メモ</p>
+      </a>
+      <a href="restaurant" class="site-card">
+        <h3>🎨 restaurant</h3>
+        <p>食べるところ</p>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 My Hobby Portal</p>
+  </footer>
+
+  <script>
+    // JavaScript例：クリック時の簡易エフェクト
+    document.querySelectorAll('.site-card').forEach(card => {
+      card.addEventListener('click', () => {
+        console.log(`${card.textContent.trim()} にアクセス`);
+      });
+    });
+  </script>
 </body>
 </html>
