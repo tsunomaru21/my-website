@@ -4,24 +4,150 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>レシピメモ</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: #fafafa;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      color: #333;
+    }
+
+    /* グリッドレイアウト */
+    .recipes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .recipe-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .recipe-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .recipe-thumb {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      background: #eee;
+    }
+
+    .recipe-info {
+      padding: 0.8rem 1rem 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .recipe-title {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #0078d7;
+      margin: 0 0 0.4rem;
+    }
+
+    .recipe-tags {
+      font-size: 0.8rem;
+      color: #666;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: auto;
+    }
+
+    .recipe-tags span {
+      background: #e7f1ff;
+      color: #005bb5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 8px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: #777;
+      font-size: 0.8rem;
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>🍳 レシピメモ</h1>
-    <input type="text" id="search" placeholder="料理名または材料で検索..." />
-    <div class="sort-buttons">
-      <button data-sort="popular">人気順</button>
-      <button data-sort="recent">最近見た順</button>
-    </div>
   </header>
 
-  <main id="recipe-list"></main>
+  <main>
+    <div class="recipes" id="recipeList">
+      <!-- JSでレシピカードを生成 -->
+    </div>
+  </main>
 
   <footer>
-    <p>&copy; 2025 My Recipe Memo</p>
+    <p>&copy; 2025 My Hobby Portal</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    // JSONファイルを読み込み
+    fetch('recipes.json')
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('recipeList');
+        container.innerHTML = '';
+
+        data.forEach(recipe => {
+          const card = document.createElement('a');
+          card.href = recipe.url || '#';
+          card.className = 'recipe-card';
+          card.target = '_blank';
+
+          const img = document.createElement('img');
+          img.src = recipe.image || 'images/noimage_thumb.jpg';
+          img.alt = recipe.name;
+          img.className = 'recipe-thumb';
+
+          const info = document.createElement('div');
+          info.className = 'recipe-info';
+
+          const title = document.createElement('h3');
+          title.className = 'recipe-title';
+          title.textContent = recipe.name;
+
+          const tags = document.createElement('div');
+          tags.className = 'recipe-tags';
+          if (recipe.tags && recipe.tags.length > 0) {
+            recipe.tags.forEach(tag => {
+              const span = document.createElement('span');
+              span.textContent = tag;
+              tags.appendChild(span);
+            });
+          }
+
+          info.appendChild(title);
+          info.appendChild(tags);
+          card.appendChild(img);
+          card.appendChild(info);
+          container.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error('JSON読み込みエラー:', err);
+      });
+  </script>
 </body>
 </html>
