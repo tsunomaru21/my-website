@@ -18,7 +18,6 @@
       color: #333;
     }
 
-    /* 検索バー・ソートボタン */
     .controls {
       display: flex;
       flex-wrap: wrap;
@@ -44,7 +43,6 @@
       font-size: 1rem;
     }
 
-    /* グリッドレイアウト */
     .recipes {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -161,17 +159,15 @@
   <section class="controls">
     <input type="text" id="searchInput" placeholder="料理名またはタグで検索..." />
     <select id="sortSelect">
-      <option value="default">並び順：デフォルト</option>
+      <option value="default">並び順：デフォルト（お気に入り上部）</option>
       <option value="popular">人気順（クリック回数）</option>
       <option value="recent">最近見た順</option>
-      <option value="favorite">お気に入り</option>
+      <option value="favorite">お気に入りのみ表示</option>
     </select>
   </section>
 
   <main>
-    <div class="recipes" id="recipeList">
-      <!-- JSでレシピカードを生成 -->
-    </div>
+    <div class="recipes" id="recipeList"></div>
   </main>
 
   <footer>
@@ -183,10 +179,10 @@
     let clickCounts = JSON.parse(localStorage.getItem("recipeClicks") || "{}");
     let recentViewed = JSON.parse(localStorage.getItem("recentRecipes") || "[]");
     let favorites = JSON.parse(localStorage.getItem("favoriteRecipes") || "[]");
+    let currentSort = "default";
 
-    // JSON読み込み
     fetch("recipes.json")
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
         recipes = data;
         renderRecipes(recipes);
@@ -196,7 +192,18 @@
       const container = document.getElementById("recipeList");
       container.innerHTML = "";
 
-      list.forEach(recipe => {
+      let renderList = [...list];
+
+      // 🧡 デフォルトのときだけお気に入りを上にする
+      if (currentSort === "default") {
+        renderList.sort((a, b) => {
+          const aFav = favorites.includes(a.name);
+          const bFav = favorites.includes(b.name);
+          return (aFav === bFav) ? 0 : aFav ? -1 : 1;
+        });
+      }
+
+      renderList.forEach(recipe => {
         const card = document.createElement("div");
         card.className = "recipe-card";
 
@@ -213,15 +220,13 @@
         favBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           e.preventDefault();
-
           if (favorites.includes(recipe.name)) {
             favorites = favorites.filter(f => f !== recipe.name);
           } else {
             favorites.push(recipe.name);
           }
-
           localStorage.setItem("favoriteRecipes", JSON.stringify(favorites));
-          renderRecipes(recipes); // 再描画
+          renderRecipes(list);
         });
 
         const link = document.createElement("a");
@@ -254,11 +259,9 @@
         card.appendChild(favBtn);
         container.appendChild(card);
 
-        // クリックカウント・閲覧履歴
         link.addEventListener("click", () => {
           clickCounts[recipe.name] = (clickCounts[recipe.name] || 0) + 1;
           localStorage.setItem("recipeClicks", JSON.stringify(clickCounts));
-
           recentViewed = recentViewed.filter(name => name !== recipe.name);
           recentViewed.unshift(recipe.name);
           recentViewed = recentViewed.slice(0, 10);
@@ -280,6 +283,7 @@
     // ⬇️ ソート
     document.getElementById("sortSelect").addEventListener("change", e => {
       const value = e.target.value;
+      currentSort = value;
       let sorted = [...recipes];
 
       if (value === "popular") {
@@ -287,7 +291,7 @@
       } else if (value === "recent") {
         sorted = recentViewed.map(name => recipes.find(r => r.name === name)).filter(Boolean);
       } else if (value === "favorite") {
-        sorted = favorites.map(name => recipes.find(r => r.name === name)).filter(Boolean);
+        sorted = recipes.filter(r => favorites.includes(r.name));
       }
 
       renderRecipes(sorted);
