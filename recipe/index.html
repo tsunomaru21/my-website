@@ -67,16 +67,32 @@
   let recipes = [];
   // favorites を Set で扱う（型のずれに強い）
   function loadFavorites() {
-    try {
-      const raw = localStorage.getItem("favorites");
-      const parsed = raw ? JSON.parse(raw) : [];
-      return new Set(Array.isArray(parsed) ? parsed : []);
-    } catch (e) {
+  try {
+    const raw = localStorage.getItem("favorites");
+
+    // localStorageが空または不正な形式の場合
+    if (!raw || raw === "undefined" || raw === "null") return new Set();
+
+    const parsed = JSON.parse(raw);
+
+    // 想定外の形式が入っていた場合に強制リセット
+    if (!Array.isArray(parsed)) {
+      console.warn("favorites形式不正のため初期化:", parsed);
+      localStorage.removeItem("favorites");
       return new Set();
     }
-  }
-  let favorites = loadFavorites(); // Set
 
+    // 有効な文字列のみフィルタ
+    const cleaned = parsed.filter(v => typeof v === "string" && v.trim() !== "");
+    return new Set(cleaned);
+
+  } catch (e) {
+    console.warn("favorites読み込みエラー:", e);
+    localStorage.removeItem("favorites");
+    return new Set();
+  }
+}
+let favorites = loadFavorites(); // Set
   // tagUsage はオブジェクト（tag -> count）
   function loadTagUsage() {
     try {
