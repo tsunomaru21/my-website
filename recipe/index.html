@@ -232,5 +232,19 @@
     location.reload();
   };
   </script>
+
+<button id="resetStorageBtn" style="position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+    🧹 リセット
+    </button>
+    <script>
+    document.getElementById("resetStorageBtn").addEventListener("click",()=>{
+      localStorage.removeItem("favorites");
+      localStorage.removeItem("tagUsage");
+      localStorage.removeItem("recentViews");
+      alert("localStorageを初期化しました。ページを再読み込みします。");
+      location.reload();
+    });
+    </script>
+
 </body>
 </html>
