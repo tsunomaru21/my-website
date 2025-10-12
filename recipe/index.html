@@ -63,7 +63,7 @@
 <body>
   <header>
     <h1>🍳 レシピメモ</h1>
-    <div class="version">ver: 2025-10-12c3 (favorites_v2_debugTF)</div>
+    <div class="version">ver: 2025-10-12c4 (favorites_v2_finalFix)</div>
     <div class="popular-tags" id="popularTags"></div>
   </header>
 
@@ -96,42 +96,42 @@
 
   let recipes = [];
 
-  function createEmptyFavoritesObj() {
-    return Object.create(null);
-  }
-  function loadFavoritesV2() {
-    try {
+  function createEmptyFavoritesObj(){ return Object.create(null); }
+
+  function loadFavoritesV2(){
+    try{
       const raw = localStorage.getItem("favorites_v2");
-      if (!raw || raw === "null" || raw === "\"null\"" || raw === "undefined") {
-        localStorage.removeItem("favorites_v2");
-        return createEmptyFavoritesObj();
-      }
+      if(!raw) return createEmptyFavoritesObj();
       const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        localStorage.removeItem("favorites_v2");
-        return createEmptyFavoritesObj();
-      }
+      if(!parsed || typeof parsed!=="object" || Array.isArray(parsed)) return createEmptyFavoritesObj();
       const out = createEmptyFavoritesObj();
-      Object.keys(parsed).forEach(k=>{
-        if(parsed[k]) out[k]=true;
-      });
+      for(const k in parsed){
+        if(parsed[k]===true) out[k]=true;
+      }
       return out;
-    } catch(e) {
-      console.warn("favorites_v2 load error:",e);
+    }catch(e){
+      console.warn("favorites_v2 load error",e);
       return createEmptyFavoritesObj();
     }
   }
+
   function saveFavoritesV2(obj){
-    localStorage.setItem("favorites_v2", JSON.stringify(obj));
+    try{
+      localStorage.setItem("favorites_v2", JSON.stringify(obj));
+    }catch(e){
+      console.error("favorites_v2 save error:", e);
+    }
   }
 
   let favorites = loadFavoritesV2();
+
   function hasFavorite(name){
-    return Object.prototype.hasOwnProperty.call(favorites,name);
+    return favorites && Object.prototype.hasOwnProperty.call(favorites, name) && favorites[name]===true;
   }
+
   function toggleFavorite(name){
-    if(hasFavorite(name)){ delete favorites[name]; }
-    else { favorites[name]=true; }
+    if(hasFavorite(name)) delete favorites[name];
+    else favorites[name]=true;
     saveFavoritesV2(favorites);
     refreshDebugPanel();
     renderRecipes();
@@ -142,26 +142,31 @@
   }
   let tagUsage=loadTagUsage();
   function saveTagUsage(){localStorage.setItem("tagUsage",JSON.stringify(tagUsage));}
+
   function loadRecentViews(){
     try{const r=localStorage.getItem("recentViews");return r?JSON.parse(r):[];}catch(e){return[];}
   }
   let recentViews=loadRecentViews();
   function saveRecentViews(){localStorage.setItem("recentViews",JSON.stringify(recentViews));}
 
-  fetch(RECIPES_JSON).then(r=>r.json()).then(data=>{
-    recipes=data;
-    renderRecipes();
-    renderPopularTags();
-    refreshDebugPanel();
-  });
+  fetch(RECIPES_JSON)
+    .then(r=>r.json())
+    .then(data=>{
+      recipes=data;
+      renderRecipes();
+      renderPopularTags();
+      refreshDebugPanel();
+    });
 
   function renderRecipes(){
+    favorites = loadFavoritesV2(); // ← 常に最新を再読込
     const q=(searchInput.value||"").trim().toLowerCase();
     let list=recipes.filter(r=>{
       const nameOk=r.name&&r.name.toLowerCase().includes(q);
       const tagOk=Array.isArray(r.tags)&&r.tags.some(t=>t.toLowerCase().includes(q));
       return q===""?true:(nameOk||tagOk);
     });
+
     const sortType=sortSelect.value;
     if(sortType==="recent"){
       list.sort((a,b)=>recentViews.indexOf(b.name)-recentViews.indexOf(a.name));
@@ -189,7 +194,6 @@
           <div class="tags">${Array.isArray(r.tags)?r.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(""):""}</div>
         </div>
       `;
-      // [T]/[F] debug label
       const debugLabel=document.createElement("div");
       debugLabel.style.position="absolute";
       debugLabel.style.bottom="4px";
@@ -208,11 +212,13 @@
         recentViews=[r.name,...recentViews.filter(n=>n!==r.name)].slice(0,10);
         saveRecentViews();
       });
+
       const favBtn=card.querySelector(".favorite-btn");
       favBtn.addEventListener("click",e=>{
         e.stopPropagation();
         toggleFavorite(r.name);
       });
+
       card.querySelectorAll(".tag").forEach(tagEl=>{
         tagEl.addEventListener("click",e=>{
           e.stopPropagation();
