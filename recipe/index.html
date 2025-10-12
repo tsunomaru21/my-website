@@ -43,7 +43,6 @@
       .favorite-btn{top:6px;right:6px;font-size:14px;padding:5px}
     }
 
-    /* デバッグパネル（表示が不要なら下部スクリプトで非表示にできます） */
     #debugPanel {
       position: fixed;
       top: 10px;
@@ -64,7 +63,7 @@
 <body>
   <header>
     <h1>🍳 レシピメモ</h1>
-    <div class="version">ver: 2025-10-12c2 (favorites_v2_robust)</div>
+    <div class="version">ver: 2025-10-12c3 (favorites_v2_debugTF)</div>
     <div class="popular-tags" id="popularTags"></div>
   </header>
 
@@ -79,7 +78,6 @@
 
   <div class="grid" id="recipeGrid"></div>
 
-  <!-- デバッグパネル（検証後はこのブロックごと削除してOK） -->
   <div id="debugPanel" aria-hidden="false">
     <div>
       <strong>DEBUG favorites_v2</strong>
@@ -90,9 +88,6 @@
   </div>
 
   <script>
-  // =============================
-  // 設定
-  // =============================
   const RECIPES_JSON = "recipes.json";
   const recipeGrid = document.getElementById("recipeGrid");
   const searchInput = document.getElementById("search");
@@ -101,220 +96,146 @@
 
   let recipes = [];
 
-  // =============================
-  // Robust favorites_v2 implementation
-  // - uses Object.create(null) to avoid prototype surprises
-  // - validates and sanitizes stored data on load
-  // =============================
   function createEmptyFavoritesObj() {
     return Object.create(null);
   }
-
   function loadFavoritesV2() {
     try {
       const raw = localStorage.getItem("favorites_v2");
-
-      // early checks for common broken values (string "null", etc)
-      if (!raw || raw === "null" || raw === "\"null\"" || raw === "undefined" || raw === "\"undefined\"") {
-        // ensure clean state
+      if (!raw || raw === "null" || raw === "\"null\"" || raw === "undefined") {
         localStorage.removeItem("favorites_v2");
         return createEmptyFavoritesObj();
       }
-
-      // parse
       const parsed = JSON.parse(raw);
-
-      // must be plain object (not array, not null)
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         localStorage.removeItem("favorites_v2");
         return createEmptyFavoritesObj();
       }
-
-      // create proto-less object and copy only string keys
       const out = createEmptyFavoritesObj();
-      Object.keys(parsed).forEach(k => {
-        if (typeof k === "string" && (parsed[k] === true || parsed[k] === 1 || parsed[k] === "1")) {
-          out[k] = true;
-        } else if (typeof k === "string" && parsed[k]) {
-          // if truthy non-boolean, still accept
-          out[k] = true;
-        }
+      Object.keys(parsed).forEach(k=>{
+        if(parsed[k]) out[k]=true;
       });
       return out;
-    } catch (e) {
-      console.warn("favorites_v2 load error:", e);
-      localStorage.removeItem("favorites_v2");
+    } catch(e) {
+      console.warn("favorites_v2 load error:",e);
       return createEmptyFavoritesObj();
     }
   }
-
-  function saveFavoritesV2(obj) {
-    try {
-      // serialize plain object (no prototype)
-      localStorage.setItem("favorites_v2", JSON.stringify(obj));
-    } catch (e) {
-      console.warn("favorites_v2 save error:", e);
-    }
+  function saveFavoritesV2(obj){
+    localStorage.setItem("favorites_v2", JSON.stringify(obj));
   }
 
-  // initialize
   let favorites = loadFavoritesV2();
-
-  // helper: strict own-property check
-  function hasFavorite(name) {
-    return Object.prototype.hasOwnProperty.call(favorites, name);
+  function hasFavorite(name){
+    return Object.prototype.hasOwnProperty.call(favorites,name);
   }
-
-  function toggleFavorite(name) {
-    if (hasFavorite(name)) {
-      delete favorites[name];
-    } else {
-      favorites[name] = true;
-    }
+  function toggleFavorite(name){
+    if(hasFavorite(name)){ delete favorites[name]; }
+    else { favorites[name]=true; }
     saveFavoritesV2(favorites);
     refreshDebugPanel();
-    // only re-render ordering if default sort is selected (preserve user's selected sort)
-    if (sortSelect.value === "default") renderRecipes();
-    else renderRecipes(); // still re-render to update icons; keep simple
+    renderRecipes();
   }
 
-  // =============================
-  // tag / recent (unchanged)
-  // =============================
-  function loadTagUsage() {
-    try {
-      const raw = localStorage.getItem("tagUsage");
-      const parsed = raw ? JSON.parse(raw) : {};
-      return (parsed && typeof parsed === "object") ? parsed : {};
-    } catch (e) {
-      return {};
-    }
+  function loadTagUsage(){
+    try{const r=localStorage.getItem("tagUsage");return r?JSON.parse(r):{};}catch(e){return{};}
   }
-  let tagUsage = loadTagUsage();
-
-  function saveTagUsage() {
-    localStorage.setItem("tagUsage", JSON.stringify(tagUsage));
+  let tagUsage=loadTagUsage();
+  function saveTagUsage(){localStorage.setItem("tagUsage",JSON.stringify(tagUsage));}
+  function loadRecentViews(){
+    try{const r=localStorage.getItem("recentViews");return r?JSON.parse(r):[];}catch(e){return[];}
   }
+  let recentViews=loadRecentViews();
+  function saveRecentViews(){localStorage.setItem("recentViews",JSON.stringify(recentViews));}
 
-  function loadRecentViews() {
-    try {
-      const raw = localStorage.getItem("recentViews");
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      return [];
-    }
-  }
-  let recentViews = loadRecentViews();
+  fetch(RECIPES_JSON).then(r=>r.json()).then(data=>{
+    recipes=data;
+    renderRecipes();
+    renderPopularTags();
+    refreshDebugPanel();
+  });
 
-  function saveRecentViews() {
-    localStorage.setItem("recentViews", JSON.stringify(recentViews));
-  }
-
-  // =============================
-  // JSON load and initial render
-  // =============================
-  fetch(RECIPES_JSON)
-    .then(r => r.json())
-    .then(data => {
-      recipes = data;
-      renderRecipes();
-      renderPopularTags();
-      refreshDebugPanel();
-    })
-    .catch(err => console.error("recipes.json 読み込みエラー:", err));
-
-  // =============================
-  // render
-  // =============================
-  function renderRecipes() {
-    const q = (searchInput.value || "").trim().toLowerCase();
-    let list = recipes.filter(r => {
-      const nameOk = r.name && r.name.toLowerCase().includes(q);
-      const tagOk = Array.isArray(r.tags) && r.tags.some(t => t.toLowerCase().includes(q));
-      return q === "" ? true : (nameOk || tagOk);
+  function renderRecipes(){
+    const q=(searchInput.value||"").trim().toLowerCase();
+    let list=recipes.filter(r=>{
+      const nameOk=r.name&&r.name.toLowerCase().includes(q);
+      const tagOk=Array.isArray(r.tags)&&r.tags.some(t=>t.toLowerCase().includes(q));
+      return q===""?true:(nameOk||tagOk);
     });
-
-    const sortType = sortSelect.value;
-    if (sortType === "recent") {
-      list.sort((a,b) => (recentViews.indexOf(b.name) - recentViews.indexOf(a.name)));
-    } else if (sortType === "popular") {
-      list.sort((a,b) => ((b.clicks||0) - (a.clicks||0)));
-    } else {
-      list.sort((a,b) => {
-        const fa = hasFavorite(a.name);
-        const fb = hasFavorite(b.name);
-        return fa === fb ? 0 : (fa ? -1 : 1);
+    const sortType=sortSelect.value;
+    if(sortType==="recent"){
+      list.sort((a,b)=>recentViews.indexOf(b.name)-recentViews.indexOf(a.name));
+    }else if(sortType==="popular"){
+      list.sort((a,b)=>(b.clicks||0)-(a.clicks||0));
+    }else{
+      list.sort((a,b)=>{
+        const fa=hasFavorite(a.name);
+        const fb=hasFavorite(b.name);
+        return fa===fb?0:(fa?-1:1);
       });
     }
 
-    recipeGrid.innerHTML = "";
-    list.forEach(r => {
-      const card = document.createElement("div");
-      card.className = "recipe-card";
-      card.dataset.name = r.name;
-
-      const favNow = hasFavorite(r.name);
-      const favAttr = favNow ? 'data-favorited="true"' : 'data-favorited="false"';
-
-      card.innerHTML = `
+    recipeGrid.innerHTML="";
+    list.forEach(r=>{
+      const card=document.createElement("div");
+      card.className="recipe-card";
+      const favNow=hasFavorite(r.name);
+      const favAttr=favNow?'data-favorited="true"':'data-favorited="false"';
+      card.innerHTML=`
         <div class="favorite-btn" ${favAttr} data-name="${escapeHtml(r.name)}">❤</div>
-        <img src="${escapeAttr(r.image || '')}" alt="${escapeAttr(r.name)}">
+        <img src="${escapeAttr(r.image||'')}" alt="${escapeAttr(r.name)}">
         <div class="recipe-info">
           <div class="recipe-title">${escapeHtml(r.name)}</div>
-          <div class="tags">${Array.isArray(r.tags) ? r.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("") : ""}</div>
+          <div class="tags">${Array.isArray(r.tags)?r.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(""):""}</div>
         </div>
       `;
+      // [T]/[F] debug label
+      const debugLabel=document.createElement("div");
+      debugLabel.style.position="absolute";
+      debugLabel.style.bottom="4px";
+      debugLabel.style.right="6px";
+      debugLabel.style.fontSize="10px";
+      debugLabel.style.color="#333";
+      debugLabel.style.background="rgba(255,255,255,0.7)";
+      debugLabel.style.borderRadius="4px";
+      debugLabel.style.padding="1px 3px";
+      debugLabel.textContent=favNow?"T":"F";
+      card.appendChild(debugLabel);
 
-      // events
-      const imgEl = card.querySelector("img");
-      imgEl.addEventListener("click", () => {
-        window.open(r.url || "#", "_blank");
-        r.clicks = (r.clicks || 0) + 1;
-        recentViews = [r.name, ...recentViews.filter(n => n !== r.name)].slice(0,10);
+      card.querySelector("img").addEventListener("click",()=>{
+        window.open(r.url||"#","_blank");
+        r.clicks=(r.clicks||0)+1;
+        recentViews=[r.name,...recentViews.filter(n=>n!==r.name)].slice(0,10);
         saveRecentViews();
       });
-
-      const favBtn = card.querySelector(".favorite-btn");
-      favBtn.addEventListener("click", (e) => {
+      const favBtn=card.querySelector(".favorite-btn");
+      favBtn.addEventListener("click",e=>{
         e.stopPropagation();
         toggleFavorite(r.name);
-        // update attribute immediately for visual feedback
-        if (hasFavorite(r.name)) favBtn.setAttribute("data-favorited","true");
-        else favBtn.setAttribute("data-favorited","false");
       });
-
-      card.querySelectorAll(".tag").forEach(tagEl => {
-        tagEl.addEventListener("click", (e) => {
+      card.querySelectorAll(".tag").forEach(tagEl=>{
+        tagEl.addEventListener("click",e=>{
           e.stopPropagation();
-          const tagText = tagEl.textContent;
-          searchInput.value = tagText;
-          incrementTagUsage(tagText);
+          const tagText=tagEl.textContent;
+          searchInput.value=tagText;
+          tagUsage[tagText]=(tagUsage[tagText]||0)+1;
           saveTagUsage();
           renderPopularTags();
           renderRecipes();
         });
       });
-
       recipeGrid.appendChild(card);
     });
   }
 
-  // =============================
-  // tags
-  // =============================
-  function incrementTagUsage(tag) {
-    tagUsage[tag] = (tagUsage[tag]||0) + 1;
-  }
-
-  function renderPopularTags() {
-    const entries = Object.entries(tagUsage).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    popularTagsEl.innerHTML = entries.map(([tag]) => `<button class="popular-tag">${escapeHtml(tag)}</button>`).join("");
+  function renderPopularTags(){
+    const entries=Object.entries(tagUsage).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    popularTagsEl.innerHTML=entries.map(([tag])=>`<button class="popular-tag">${escapeHtml(tag)}</button>`).join("");
     popularTagsEl.querySelectorAll(".popular-tag").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const tag = btn.textContent;
-        searchInput.value = tag;
-        incrementTagUsage(tag);
+      btn.addEventListener("click",()=>{
+        const tag=btn.textContent;
+        searchInput.value=tag;
+        tagUsage[tag]=(tagUsage[tag]||0)+1;
         saveTagUsage();
         renderPopularTags();
         renderRecipes();
@@ -322,44 +243,33 @@
     });
   }
 
-  // =============================
-  // UI helpers & events
-  // =============================
-  searchInput.addEventListener("input", () => renderRecipes());
-  sortSelect.addEventListener("change", () => renderRecipes());
+  searchInput.addEventListener("input",()=>renderRecipes());
+  sortSelect.addEventListener("change",()=>renderRecipes());
+  function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+  function escapeAttr(s){return escapeHtml(s||'');}
 
-  function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-  function escapeAttr(s){ return escapeHtml(s||''); }
-
-  // =============================
-  // Debug panel functions
-  // =============================
-  const debugDataEl = document.getElementById("debugData");
+  const debugDataEl=document.getElementById("debugData");
   function refreshDebugPanel(){
-    try {
-      const raw = localStorage.getItem("favorites_v2");
-      const pretty = raw ? JSON.stringify(JSON.parse(raw), null, 2) : "{}";
-      debugDataEl.textContent = pretty;
-    } catch(e) {
-      debugDataEl.textContent = String(localStorage.getItem("favorites_v2"));
+    try{
+      const raw=localStorage.getItem("favorites_v2");
+      const pretty=raw?JSON.stringify(JSON.parse(raw),null,2):"{}";
+      debugDataEl.textContent=pretty;
+    }catch(e){
+      debugDataEl.textContent=String(localStorage.getItem("favorites_v2"));
     }
   }
-  document.getElementById("dbgRefresh").addEventListener("click", ()=>{ refreshDebugPanel(); alert("refreshed"); });
-  document.getElementById("dbgClear").addEventListener("click", ()=>{
+  document.getElementById("dbgRefresh").addEventListener("click",()=>{refreshDebugPanel();alert("refreshed");});
+  document.getElementById("dbgClear").addEventListener("click",()=>{
     localStorage.removeItem("favorites_v2");
-    favorites = createEmptyFavoritesObj();
+    favorites=createEmptyFavoritesObj();
     saveFavoritesV2(favorites);
     refreshDebugPanel();
     renderRecipes();
     alert("favorites_v2 cleared");
   });
-
-  // auto-refresh initially
   refreshDebugPanel();
-
   </script>
 
-  <!-- 🧹 完全リセット -->
   <button id="resetStorageBtn"
   style="position:fixed;bottom:20px;right:20px;z-index:999;background:#ff4081;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
   🧹 リセット
@@ -369,9 +279,8 @@
   document.getElementById("resetStorageBtn").addEventListener("click",()=>{
     localStorage.clear();
     alert("localStorageを完全初期化しました。ページを再読み込みします。");
-    location.href = location.pathname + "?v=" + Date.now();
+    location.href=location.pathname+"?v="+Date.now();
   });
   </script>
-
 </body>
 </html>
