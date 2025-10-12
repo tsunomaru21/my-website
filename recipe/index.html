@@ -18,6 +18,32 @@
       color: #333;
     }
 
+    /* 検索バー・ソートボタン */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1rem auto;
+      max-width: 600px;
+    }
+
+    .controls input[type="text"] {
+      flex: 1;
+      min-width: 180px;
+      padding: 0.5rem 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .controls select {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
     /* グリッドレイアウト */
     .recipes {
       display: grid;
@@ -34,6 +60,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      position: relative; /* ★ お気に入りアイコン配置用 */
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
@@ -85,6 +112,29 @@
       color: #777;
       font-size: 0.8rem;
     }
+
+    /* ★ お気に入りアイコン */
+    .favorite-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.85);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 32px;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .favorite-btn:hover {
+      background: rgba(255,255,255,1);
+    }
+    .favorite-btn.active {
+      color: #e63946;
+    }
   </style>
 </head>
 <body>
@@ -92,10 +142,18 @@
     <h1>🍳 レシピメモ</h1>
   </header>
 
+  <section class="controls">
+    <input type="text" id="searchInput" placeholder="料理名またはタグで検索..." />
+    <select id="sortSelect">
+      <option value="default">並び順：デフォルト</option>
+      <option value="popular">人気順（クリック回数）</option>
+      <option value="recent">最近見た順</option>
+      <option value="favorite">お気に入りのみ</option> <!-- ★ 追加 -->
+    </select>
+  </section>
+
   <main>
-    <div class="recipes" id="recipeList">
-      <!-- JSでレシピカードを生成 -->
-    </div>
+    <div class="recipes" id="recipeList"></div>
   </main>
 
   <footer>
@@ -103,51 +161,120 @@
   </footer>
 
   <script>
-    // JSONファイルを読み込み
-    fetch('recipes.json')
+    let recipes = [];
+    let clickCounts = JSON.parse(localStorage.getItem("recipeClicks") || "{}");
+    let recentViewed = JSON.parse(localStorage.getItem("recentRecipes") || "[]");
+    let favorites = JSON.parse(localStorage.getItem("favorites") || "[]"); // ★ 追加
+
+    // JSONを読み込んで描画
+    fetch("recipes.json")
       .then(response => response.json())
       .then(data => {
-        const container = document.getElementById('recipeList');
-        container.innerHTML = '';
-
-        data.forEach(recipe => {
-          const card = document.createElement('a');
-          card.href = recipe.url || '#';
-          card.className = 'recipe-card';
-          card.target = '_blank';
-
-          const img = document.createElement('img');
-          img.src = recipe.image || 'images/noimage_thumb.jpg';
-          img.alt = recipe.name;
-          img.className = 'recipe-thumb';
-
-          const info = document.createElement('div');
-          info.className = 'recipe-info';
-
-          const title = document.createElement('h3');
-          title.className = 'recipe-title';
-          title.textContent = recipe.name;
-
-          const tags = document.createElement('div');
-          tags.className = 'recipe-tags';
-          if (recipe.tags && recipe.tags.length > 0) {
-            recipe.tags.forEach(tag => {
-              const span = document.createElement('span');
-              span.textContent = tag;
-              tags.appendChild(span);
-            });
-          }
-
-          info.appendChild(title);
-          info.appendChild(tags);
-          card.appendChild(img);
-          card.appendChild(info);
-          container.appendChild(card);
-        });
-      })
-      .catch(err => {
-        console.error('JSON読み込みエラー:', err);
+        recipes = data;
+        renderRecipes(recipes);
       });
+
+    function renderRecipes(list) {
+      const container = document.getElementById("recipeList");
+      container.innerHTML = "";
+
+      list.forEach(recipe => {
+        const card = document.createElement("div");
+        card.className = "recipe-card";
+
+        // ★ お気に入りボタン追加
+        const favBtn = document.createElement("button");
+        favBtn.className = "favorite-btn";
+        favBtn.innerHTML = favorites.includes(recipe.name) ? "❤️" : "🤍";
+        if (favorites.includes(recipe.name)) favBtn.classList.add("active");
+
+        favBtn.addEventListener("click", e => {
+          e.stopPropagation();
+          e.preventDefault();
+
+          if (favorites.includes(recipe.name)) {
+            favorites = favorites.filter(f => f !== recipe.name);
+          } else {
+            favorites.push(recipe.name);
+          }
+          localStorage.setItem("favorites", JSON.stringify(favorites));
+          renderRecipes(list); // 再描画
+        });
+
+        const link = document.createElement("a");
+        link.href = recipe.url || "#";
+        link.target = "_blank";
+
+        const img = document.createElement("img");
+        img.src = recipe.image || "images/noimage_thumb.jpg";
+        img.alt = recipe.name;
+        img.className = "recipe-thumb";
+
+        const info = document.createElement("div");
+        info.className = "recipe-info";
+
+        const title = document.createElement("h3");
+        title.className = "recipe-title";
+        title.textContent = recipe.name;
+
+        const tags = document.createElement("div");
+        tags.className = "recipe-tags";
+        if (recipe.tags && recipe.tags.length > 0) {
+          recipe.tags.forEach(tag => {
+            const span = document.createElement("span");
+            span.textContent = tag;
+            tags.appendChild(span);
+          });
+        }
+
+        // クリックカウント
+        link.addEventListener("click", () => {
+          clickCounts[recipe.name] = (clickCounts[recipe.name] || 0) + 1;
+          localStorage.setItem("recipeClicks", JSON.stringify(clickCounts));
+
+          recentViewed = recentViewed.filter(name => name !== recipe.name);
+          recentViewed.unshift(recipe.name);
+          recentViewed = recentViewed.slice(0, 10);
+          localStorage.setItem("recentRecipes", JSON.stringify(recentViewed));
+        });
+
+        info.appendChild(title);
+        info.appendChild(tags);
+        link.appendChild(img);
+        link.appendChild(info);
+        card.appendChild(link);
+        card.appendChild(favBtn);
+        container.appendChild(card);
+      });
+    }
+
+    // 🔍 検索
+    document.getElementById("searchInput").addEventListener("input", e => {
+      const query = e.target.value.toLowerCase();
+      const filtered = recipes.filter(r =>
+        r.name.toLowerCase().includes(query) ||
+        (r.tags && r.tags.some(tag => tag.toLowerCase().includes(query)))
+      );
+      renderRecipes(filtered);
+    });
+
+    // ⬇️ ソート
+    document.getElementById("sortSelect").addEventListener("change", e => {
+      const value = e.target.value;
+      let sorted = [...recipes];
+
+      if (value === "popular") {
+        sorted.sort((a, b) => (clickCounts[b.name] || 0) - (clickCounts[a.name] || 0));
+      } else if (value === "recent") {
+        sorted = recentViewed
+          .map(name => recipes.find(r => r.name === name))
+          .filter(Boolean);
+      } else if (value === "favorite") { // ★ お気に入りのみ
+        sorted = recipes.filter(r => favorites.includes(r.name));
+      }
+
+      renderRecipes(sorted);
+    });
   </script>
 </body>
 </html>
