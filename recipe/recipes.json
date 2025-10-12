@@ -1,0 +1,20 @@
+[
+  {
+    "name": "オムライス",
+    "image": "https://placehold.co/400x250?text=Omelette",
+    "url": "https://example.com/omelette",
+    "tags": ["卵", "ご飯", "ケチャップ"]
+  },
+  {
+    "name": "カレーライス",
+    "image": "https://placehold.co/400x250?text=Curry",
+    "url": "https://example.com/curry",
+    "tags": ["カレー粉", "じゃがいも", "にんじん"]
+  },
+  {
+    "name": "パスタ",
+    "image": "https://placehold.co/400x250?text=Pasta",
+    "url": "https://example.com/pasta",
+    "tags": ["パスタ", "トマト", "チーズ"]
+  }
+]
