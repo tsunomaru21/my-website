@@ -1,0 +1,1563 @@
+{
+    "type": "FeatureCollection",
+    "features": [{ "geometry": {
+    "type": "Point",
+    "coordinates": [
+    139.645191582221,35.3365554457337 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "水族館",
+    "hours": "8:00-22:30",
+    "description": "車40分",
+    "name": "八景島シーパラダイス",
+    "closed": "年中無休",
+    "main_site": "https://www.seaparadise.co.jp/index.html",
+    "sub_site": "",
+    "ido": "35.3365554457337",
+    "keido": "139.645191582221",
+    "storeid": "1"
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.47940653933,35.3101973851976 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "水族館",
+    "hours": "9:00-17:00",
+    "description": "車、電車40分",
+    "name": "新江ノ島水族館",
+    "closed": "年中無休",
+    "main_site": "https://www.enosui.com/",
+    "sub_site": "",
+    "ido": "35.3101973851976",
+    "keido": "139.47940653933",
+    "storeid": "2"
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.258449268174,35.5488748398559 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "牧場",
+    "hours": "10:00-17:00",
+    "description": "車40分",
+    "name": "服部牧場",
+    "closed": "年中無休",
+    "main_site": "https://kanagawa-hattoribokujou.com/",
+    "sub_site": "",
+    "ido": "35.5488748398559",
+    "keido": "139.258449268174",
+    "storeid": "3"
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.121684454669,35.2396890529645 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "文化施設",
+    "hours": "9:00-16:30",
+    "description": "車40分",
+    "name": "地球博物館",
+    "closed": "不定休",
+    "main_site": "https://nh.kanagawa-museum.jp/",
+    "sub_site": "",
+    "ido": "35.2396890529645",
+    "keido": "139.121684454669",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.449044483507,35.3212944509241 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "5:00-21:00",
+    "description": "車40分",
+    "name": "辻堂海浜公園",
+    "closed": "年中無休",
+    "main_site": "https://www.kanagawa-park.or.jp/tujidou/",
+    "sub_site": "",
+    "ido": "35.3212944509241",
+    "keido": "139.449044483507",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.261685602833,35.5541851524069 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "パン屋",
+    "hours": "9:30-17:30",
+    "description": "車40分",
+    "name": "オギノパン本社",
+    "closed": "年中無休",
+    "main_site": "https://ogino-pan.com/honsha/",
+    "sub_site": "",
+    "ido": "35.5541851524069",
+    "keido": "139.261685602833",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.256434783515,35.5418600419989 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "8:30-18:00",
+    "description": "車40分",
+    "name": "あいかわ公園",
+    "closed": "年中無休",
+    "main_site": "http://www.aikawa-park.jp/",
+    "sub_site": "",
+    "ido": "35.5418600419989",
+    "keido": "139.256434783515",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.526689688662,35.4944574570697 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "9:30-16:30",
+    "description": "車40分",
+    "name": "ズーラシア",
+    "closed": "火曜日",
+    "main_site": "https://www.hama-midorinokyokai.or.jp/zoo/zoorasia/",
+    "sub_site": "",
+    "ido": "35.4944574570697",
+    "keido": "139.526689688662",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.378251710499,35.4293172588911 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "5:30-21:30",
+    "description": "車15分",
+    "name": "海老名運動公園",
+    "closed": "年中無休",
+    "main_site": "https://www.ebinasportspark.jp/",
+    "sub_site": "",
+    "ido": "35.4293172588911",
+    "keido": "139.378251710499",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.380704454677,35.4594601733343 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "8:30-17:00",
+    "description": "車、徒歩15分",
+    "name": "相模三川公園",
+    "closed": "年中無休",
+    "main_site": "https://www.kanagawa-park.or.jp/sagamisansen/",
+    "sub_site": "",
+    "ido": "35.4594601733343",
+    "keido": "139.380704454677",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.403214039342,35.6498151366121 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "9:30-17:00",
+    "description": "車、電車60分",
+    "name": "多摩動物公園",
+    "closed": "水曜日",
+    "main_site": "https://www.tokyo-zoo.net/zoo/tama/",
+    "sub_site": "",
+    "ido": "35.6498151366121",
+    "keido": "139.403214039342",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.479409618113,35.3105809438531 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "7:00-21:00",
+    "description": "車、電車40分",
+    "name": "片瀬海岸地下駐車場",
+    "closed": "年中無休",
+    "main_site": "https://www.s-n-p.jp/parking/p6katase/",
+    "sub_site": "",
+    "ido": "35.3105809438531",
+    "keido": "139.479409618113",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.391844698856,35.5272022038843 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "6:00-20:00",
+    "description": "車25分",
+    "name": "相模原麻溝公園",
+    "closed": "年中無休",
+    "main_site": "https://www.kanagawaparks.com/asamizo/facility.html",
+    "sub_site": "",
+    "ido": "35.5272022038843",
+    "keido": "139.391844698856",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.328883710503,35.5475507128099 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "水族館",
+    "hours": "9:30-16:30",
+    "description": "車30分",
+    "name": "相模川ふれあい科学館",
+    "closed": "月曜日",
+    "main_site": "https://sagamigawa-fureai.com/",
+    "sub_site": "",
+    "ido": "35.5475507128099",
+    "keido": "139.328883710503",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.355934781668,35.5585582385229 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "10:00-18:00",
+    "description": "車25分",
+    "name": "ぼうけんの国　相模原店",
+    "closed": "年中無休",
+    "main_site": "https://boukennokuni.com/sagamiharakamimizo/",
+    "sub_site": "",
+    "ido": "35.5585582385229",
+    "keido": "139.355934781668",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.201763381662,35.3807732270725 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "7:00-22:00",
+    "description": "車40分",
+    "name": "秦野市カルチャーパーク",
+    "closed": "年末年始",
+    "main_site": "https://shisetsu.mizuno.jp/m-7506-0002/gallery",
+    "sub_site": "",
+    "ido": "35.3807732270725",
+    "keido": "139.201763381662",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.451185212347,35.43726187539 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "24時間",
+    "description": "車25分",
+    "name": "やまとゆとりの森",
+    "closed": "年中無休",
+    "main_site": "https://www.sakata-greenservice.co.jp/yutori/",
+    "sub_site": "",
+    "ido": "35.43726187539",
+    "keido": "139.451185212347",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.219562068185,35.8597403104989 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "BBQ場",
+    "hours": "10:00-16:00",
+    "description": "車80分",
+    "name": "ファミリアリゾート",
+    "closed": "不定休",
+    "main_site": "https://familiar-resort.net/",
+    "sub_site": "",
+    "ido": "35.8597403104989",
+    "keido": "139.219562068185",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.428961125841,35.4368444692221 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ショッピングセンター",
+    "hours": "10:00-20:00",
+    "description": "車20分",
+    "name": "綾瀬タウンヒルズ",
+    "closed": "不定休",
+    "main_site": "https://www.ayase-sc.jp/",
+    "sub_site": "",
+    "ido": "35.4368444692221",
+    "keido": "139.428961125841",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.390090182316,35.4557034365339 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ショッピングセンター",
+    "hours": "10:00-20:00",
+    "description": "徒歩3分",
+    "name": "ららぽーと海老名",
+    "closed": "不定休",
+    "main_site": "https://mitsui-shopping-park.com/lalaport/ebina/event/?sort=tw&row=new",
+    "sub_site": "",
+    "ido": "35.4557034365339",
+    "keido": "139.390090182316",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.392783120025,35.45199787698 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ショッピングセンター",
+    "hours": "-",
+    "description": "徒歩10分",
+    "name": "ビナウォーク",
+    "closed": "不定休",
+    "main_site": "https://www.odakyu-sc.com/vinawalk/event/calendar/",
+    "sub_site": "",
+    "ido": "35.45199787698",
+    "keido": "139.392783120025",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.392765571567,35.4510384693803 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ショッピングセンター",
+    "hours": "9:00-22:00",
+    "description": "徒歩15分",
+    "name": "イオン海老名",
+    "closed": "不定休",
+    "main_site": "https://www.aeon.com/store/%E3%82%A4%E3%82%AA%E3%83%B3/%E3%82%A4%E3%82%AA%E3%83%B3%E6%B5%B7%E8%80%81%E5%90%8D%E5%BA%97/",
+    "sub_site": "",
+    "ido": "35.4510384693803",
+    "keido": "139.392765571567",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.385944714025,35.4513836920271 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "文化施設",
+    "hours": "9:00-21:00",
+    "description": "徒歩15分",
+    "name": "海老名市立図書館",
+    "closed": "年中無休",
+    "main_site": "https://ebina.city-library.jp/",
+    "sub_site": "",
+    "ido": "35.4513836920271",
+    "keido": "139.385944714025",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.391180386015,35.4581545635174 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "-",
+    "description": "徒歩1分",
+    "name": "泉第一公園",
+    "closed": "年中無休",
+    "main_site": "",
+    "sub_site": "",
+    "ido": "35.4581545635174",
+    "keido": "139.391180386015",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.392344464654,35.4573461964388 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "-",
+    "description": "徒歩5分",
+    "name": "上郷第一児童公園",
+    "closed": "年中無休",
+    "main_site": "",
+    "sub_site": "",
+    "ido": "35.4573461964388",
+    "keido": "139.392344464654",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.702005981656,35.2227947056973 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "8:00-17:30",
+    "description": "車70分",
+    "name": "くりはま花の国",
+    "closed": "年中無休",
+    "main_site": "https://www.kanagawaparks.com/kurihama/",
+    "sub_site": "",
+    "ido": "35.2227947056973",
+    "keido": "139.702005981656",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [138.664952654685,35.7025284969736 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "-",
+    "description": "車100分",
+    "name": "笛吹川フルーツ公園",
+    "closed": "年中無休",
+    "main_site": "https://fuefukigawafp.co.jp/",
+    "sub_site": "",
+    "ido": "35.7025284969736",
+    "keido": "138.664952654685",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [138.823505568171,35.4553711875872 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "9:00-17:00",
+    "description": "車90分",
+    "name": "さかな公園",
+    "closed": "火曜日",
+    "main_site": "https://yamanakako.info/fish_park.php",
+    "sub_site": "",
+    "ido": "35.4553711875872",
+    "keido": "138.823505568171",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [138.869175954671,35.2967315555251 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "9:00-17:00",
+    "description": "車70分",
+    "name": "樹空の森",
+    "closed": "火曜日",
+    "main_site": "https://jukuu.jp/",
+    "sub_site": "",
+    "ido": "35.2967315555251",
+    "keido": "138.869175954671",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [140.182332725838,35.3548276737801 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "不定",
+    "description": "車100分",
+    "name": "市原ぞうの国",
+    "closed": "不定休",
+    "main_site": "https://zounokuni.com/",
+    "sub_site": "",
+    "ido": "35.3548276737801",
+    "keido": "140.182332725838",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [140.120333625829,35.1159564053275 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "水族館",
+    "hours": "不定",
+    "description": "車130分",
+    "name": "鴨川シーワールド",
+    "closed": "不定休",
+    "main_site": "https://www.kamogawa-seaworld.jp/",
+    "sub_site": "",
+    "ido": "35.1159564053275",
+    "keido": "140.120333625829",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.377721381684,36.0172860166673 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "9:00-17:00",
+    "description": "車80分",
+    "name": "化石と自然の体験館",
+    "closed": "月曜日",
+    "main_site": "https://www.kasekitaiken.com/",
+    "sub_site": "",
+    "ido": "36.0172860166673",
+    "keido": "139.377721381684",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [140.59648679704,36.4058898771232 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "不定",
+    "description": "車160分",
+    "name": "国営ひたち海浜公園",
+    "closed": "火曜日",
+    "main_site": "https://hitachikaihin.jp/",
+    "sub_site": "",
+    "ido": "36.4058898771232",
+    "keido": "140.59648679704",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.520000739366,36.3141733625931 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "不定",
+    "description": "車120分",
+    "name": "あしかがフラワーパーク",
+    "closed": "不定休",
+    "main_site": "https://www.ashikaga.co.jp/",
+    "sub_site": "",
+    "ido": "36.3141733625931",
+    "keido": "139.520000739366",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.127577996999,35.2596504938685 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "9:00-16:30",
+    "description": "車、電車60分",
+    "name": "小田原こどもの森公園わんぱくらんど",
+    "closed": "月曜日",
+    "main_site": "https://odawara-jigyo-kyokai.jp/wanpaku/wanpakuland",
+    "sub_site": "",
+    "ido": "35.2596504938685",
+    "keido": "139.127577996999",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [138.811617196999,35.2589946940102 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "9:00-16:30",
+    "description": "車70分",
+    "name": "富士サファリパーク",
+    "closed": "年中無休",
+    "main_site": "https://www.fujisafari.co.jp/",
+    "sub_site": "",
+    "ido": "35.2589946940102",
+    "keido": "138.811617196999",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.344784490901,35.3997552726794 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "牧場",
+    "hours": "9:00-17:00",
+    "description": "車30分",
+    "name": "柏木牧場",
+    "closed": "水曜日",
+    "main_site": "http://www.isehara.net/kashiwagi/",
+    "sub_site": "",
+    "ido": "35.3997552726794",
+    "keido": "139.344784490901",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.457993986995,35.4397860619015 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "レストラン",
+    "hours": "11:00-15:00",
+    "description": "車30分",
+    "name": "太古レストラン酒場ダイナソー",
+    "closed": "火曜日",
+    "main_site": "http://www.k-scc.co.jp/dinosaur2/",
+    "sub_site": "",
+    "ido": "35.4397860619015",
+    "keido": "139.457993986995",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.457166825843,35.4906801371248 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ショッピングセンター",
+    "hours": "9:00-21:00",
+    "description": "車、電車30分",
+    "name": "イトーヨーカドー大和鶴間店",
+    "closed": "年中無休",
+    "main_site": "https://stores.itoyokado.co.jp/213",
+    "sub_site": "",
+    "ido": "35.4906801371248",
+    "keido": "139.457166825843",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.426960568172,35.4823346090849 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ショッピングセンター",
+    "hours": "10:00-20:00",
+    "description": "車20分",
+    "name": "コストコ座間",
+    "closed": "年末年始",
+    "main_site": "https://www.costco.co.jp/store-finder/Zama",
+    "sub_site": "",
+    "ido": "35.4823346090849",
+    "keido": "139.426960568172",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.461954338272,35.5072813564836 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ショッピングセンター",
+    "hours": "9:00-20:00",
+    "description": "車30分",
+    "name": "角上魚類",
+    "closed": "年末年始",
+    "main_site": "https://www.kakujoe.co.jp/shop/tsukimino.php",
+    "sub_site": "",
+    "ido": "35.5072813564836",
+    "keido": "139.461954338272",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.364403306651,35.4360665063266 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "パン屋",
+    "hours": "8:00-20:00",
+    "description": "車20分",
+    "name": "パン工房ブンブン厚木",
+    "closed": "火曜日",
+    "main_site": "https://tabelog.com/kanagawa/A1408/A140802/14010624/",
+    "sub_site": "",
+    "ido": "35.4360665063266",
+    "keido": "139.364403306651",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.067818941632,34.8162202263504 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "水族館",
+    "hours": "9:00-17:00",
+    "description": "車150分",
+    "name": "熱川バナナワニ園",
+    "closed": "年中無休",
+    "main_site": "http://bananawani.jp/",
+    "sub_site": "",
+    "ido": "34.8162202263504",
+    "keido": "139.067818941632",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.388388467613,35.5319474500961 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "6:00-20:00",
+    "description": "車30分",
+    "name": "相模原公園",
+    "closed": "年中無休",
+    "main_site": "http://www.sagamihara.kanagawa-park.or.jp/",
+    "sub_site": "",
+    "ido": "35.5319474500961",
+    "keido": "139.388388467613",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.469791514193,35.3977947326883 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "文化施設",
+    "hours": "9:00-17:00",
+    "description": "車40分",
+    "name": "藤沢市湘南台文化センター",
+    "closed": "月曜日",
+    "main_site": "https://www.kodomokan.jp/",
+    "sub_site": "",
+    "ido": "35.3977947326883",
+    "keido": "139.469791514193",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.599182768167,35.3500357203339 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "9:30-16:30",
+    "description": "車50分",
+    "name": "金沢動物園",
+    "closed": "月曜日",
+    "main_site": "https://www.hama-midorinokyokai.or.jp/zoo/kanazawa/",
+    "sub_site": "",
+    "ido": "35.3500357203339",
+    "keido": "139.599182768167",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.466971988449,35.3330359372563 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "8:30-17:00",
+    "description": "車40分",
+    "name": "長久保公園",
+    "closed": "月曜日",
+    "main_site": "https://nagakubokouen.jp/",
+    "sub_site": "",
+    "ido": "35.3330359372563",
+    "keido": "139.466971988449",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.173402568169,35.4028744375011 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "8:00-21:00",
+    "description": "車30分",
+    "name": "秦野戸川公園",
+    "closed": "年中無休",
+    "main_site": "https://www.kanagawa-park.or.jp/hadanotokawa/",
+    "sub_site": "",
+    "ido": "35.4028744375011",
+    "keido": "139.173402568169",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.051376154669,35.2449761051792 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "文化施設",
+    "hours": "9:00-17:00",
+    "description": "車80分",
+    "name": "彫刻の森美術館",
+    "closed": "年中無休",
+    "main_site": "https://www.hakone-oam.or.jp/",
+    "sub_site": "",
+    "ido": "35.2449761051792",
+    "keido": "139.051376154669",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.201064997011,35.6048672495184 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "9:00-17:00",
+    "description": "車50分",
+    "name": "さがみ湖プレジャーフォレスト",
+    "closed": "不定休",
+    "main_site": "https://www.sagamiko-resort.jp/",
+    "sub_site": "",
+    "ido": "35.6048672495184",
+    "keido": "139.201064997011",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.33082629701,35.5838123472305 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "8:00-19:00",
+    "description": "車40分",
+    "name": "相模原北公園",
+    "closed": "年中無休",
+    "main_site": "https://www.pref.kanagawa.jp/docs/u5r/cnt/f550/tabi-156.html",
+    "sub_site": "",
+    "ido": "35.5838123472305",
+    "keido": "139.33082629701",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.03085119515,35.2017407390964 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "パン屋",
+    "hours": "9:00-17:00",
+    "description": "車70分",
+    "name": "Bakery & Table",
+    "closed": "年中無休",
+    "main_site": "https://www.bthjapan.com/hakone.php",
+    "sub_site": "",
+    "ido": "35.2017407390964",
+    "keido": "139.03085119515",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [138.580296866331,35.6693634689519 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "文化施設",
+    "hours": "9:30-17:00",
+    "description": "車100分",
+    "name": "山梨県立科学館",
+    "closed": "不定休",
+    "main_site": "https://www.kagakukan.pref.yamanashi.jp/",
+    "sub_site": "",
+    "ido": "35.6693634689519",
+    "keido": "138.580296866331",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [138.824116941183,35.4555263185932 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "水族館",
+    "hours": "9:00-17:00",
+    "description": "車80分",
+    "name": "森の中の水族館",
+    "closed": "火曜日",
+    "main_site": "http://www.morinonakano-suizokukan.com/index.html",
+    "sub_site": "",
+    "ido": "35.4555263185932",
+    "keido": "138.824116941183",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.039686468147,34.7967045522331 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "9:30-17:00",
+    "description": "車170分",
+    "name": "伊豆アニマルキングダム",
+    "closed": "不定休",
+    "main_site": "https://www.izu-kamori.jp/izu-biopark/",
+    "sub_site": "",
+    "ido": "34.7967045522331",
+    "keido": "139.039686468147",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [138.98068516816,35.1516630283092 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "9:00-17:00",
+    "description": "車70分",
+    "name": "三島スカイウォーク",
+    "closed": "年中無休",
+    "main_site": "https://mishima-skywalk.jp/",
+    "sub_site": "",
+    "ido": "35.1516630283092",
+    "keido": "138.98068516816",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [138.945941268143,34.6660635001427 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "水族館",
+    "hours": "不定",
+    "description": "車170分",
+    "name": "下田海中水族館",
+    "closed": "年中無休",
+    "main_site": "https://shimoda-aquarium.com/",
+    "sub_site": "",
+    "ido": "34.6660635001427",
+    "keido": "138.945941268143",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [137.633214968147,34.7660457320942 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "9:00-16:30",
+    "description": "車150分",
+    "name": "浜松市動物園",
+    "closed": "年末年始",
+    "main_site": "https://hamazoo.net/",
+    "sub_site": "",
+    "ido": "34.7660457320942",
+    "keido": "137.633214968147",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.129033739329,35.2804595143996 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "9:00-17:00",
+    "description": "車60分",
+    "name": "小田原フラワーガーデン",
+    "closed": "月曜日",
+    "main_site": "https://www.kanagawaparks.com/odawarafg/",
+    "sub_site": "",
+    "ido": "35.2804595143996",
+    "keido": "139.129033739329",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.13413640933,35.283027728252 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "8:30-17:30",
+    "description": "車60分",
+    "name": "おだわら諏訪の原公園",
+    "closed": "年中無休",
+    "main_site": "https://www.kanagawaparks.com/suwanohara/",
+    "sub_site": "",
+    "ido": "35.283027728252",
+    "keido": "139.13413640933",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.342567468167,35.341488417559 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "4:00-22:00",
+    "description": "車30分",
+    "name": "平塚市総合公園",
+    "closed": "月曜日",
+    "main_site": "https://www.city.hiratsuka.kanagawa.jp/koen/page-c_00840.html",
+    "sub_site": "",
+    "ido": "35.341488417559",
+    "keido": "139.342567468167",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.121439554378,34.9056077544865 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "遊園地",
+    "hours": "9:30-17:00",
+    "description": "車140分",
+    "name": "伊豆ぐらんぱる公園",
+    "closed": "不定休",
+    "main_site": "https://www.granpal.com/",
+    "sub_site": "",
+    "ido": "34.9056077544865",
+    "keido": "139.121439554378",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.916247922997,36.0049045637302 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "文化施設",
+    "hours": "9:30-17:00",
+    "description": "車110分",
+    "name": "ミュージアムパーク　茨城県自然博物館",
+    "closed": "月曜日",
+    "main_site": "https://www.nat.museum.ibk.ed.jp/",
+    "sub_site": "",
+    "ido": "36.0049045637302",
+    "keido": "139.916247922997",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.714107068191,36.0206143398608 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "9:30-17:00",
+    "description": "車100分",
+    "name": "東武動物公園",
+    "closed": "不定休",
+    "main_site": "https://www.tobuzoo.com/",
+    "sub_site": "",
+    "ido": "36.0206143398608",
+    "keido": "139.714107068191",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [140.815663797061,36.993513033874 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "10:00-21:30",
+    "description": "車180分",
+    "name": "スパリゾート　ハワイアンズ",
+    "closed": "不明",
+    "main_site": "https://www.hawaiians.co.jp/",
+    "sub_site": "",
+    "ido": "36.993513033874",
+    "keido": "140.815663797061",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.268866168168,35.3909450799754 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "9:00-16:00",
+    "description": "車40分",
+    "name": "三岳園",
+    "closed": "不定休",
+    "main_site": "https://www.mitake-en.jp/",
+    "sub_site": "",
+    "ido": "35.3909450799754",
+    "keido": "139.268866168168",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.244294997005,35.4276029031692 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "-",
+    "description": "車40分",
+    "name": "大山ケーブル駅",
+    "closed": "不定休",
+    "main_site": "https://www.ooyama-cable.co.jp/",
+    "sub_site": "",
+    "ido": "35.4276029031692",
+    "keido": "139.244294997005",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.594930097003,35.3769804290855 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "文化施設",
+    "hours": "9:30-17:00",
+    "description": "車、電車50分",
+    "name": "はまぎん　こども宇宙科学館",
+    "closed": "不定休",
+    "main_site": "https://www.yokohama-kagakukan.jp/",
+    "sub_site": "",
+    "ido": "35.3769804290855",
+    "keido": "139.594930097003",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.313891497004,35.4038934928858 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "文化施設",
+    "hours": "9:00-17:00",
+    "description": "車30分",
+    "name": "伊勢原市こども科学館",
+    "closed": "火曜日",
+    "main_site": "https://www.city.isehara.kanagawa.jp/kagakukan/",
+    "sub_site": "",
+    "ido": "35.4038934928858",
+    "keido": "139.313891497004",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.456662168169,35.3990662362631 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "10:00-16:30",
+    "description": "車30分",
+    "name": "いすゞプラザ",
+    "closed": "不定休",
+    "main_site": "https://www.isuzu.co.jp/plaza/exhibition/",
+    "sub_site": "",
+    "ido": "35.3990662362631",
+    "keido": "139.456662168169",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.218793168166,35.3387966166852 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "9:00-17:00",
+    "description": "車30分",
+    "name": "中井中央公園",
+    "closed": "月曜日",
+    "main_site": "https://www.kanagawaparks.com/nakaichuo/",
+    "sub_site": "",
+    "ido": "35.3387966166852",
+    "keido": "139.218793168166",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.880376623273,35.6328671350965 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "遊園地",
+    "hours": "不明",
+    "description": "車70分",
+    "name": "ディズニーランド",
+    "closed": "年中無休",
+    "main_site": "https://www.tokyodisneyresort.jp/tdl/",
+    "sub_site": "",
+    "ido": "35.6328671350965",
+    "keido": "139.880376623273",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.517556968177,35.6248966680678 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "遊園地",
+    "hours": "不定",
+    "description": "車、電車60分",
+    "name": "よみうりランド",
+    "closed": "木曜日",
+    "main_site": "https://www.yomiuriland.com/",
+    "sub_site": "",
+    "ido": "35.6248966680678",
+    "keido": "139.517556968177",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.046279996982,34.7695423464397 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ホテル",
+    "hours": "",
+    "description": "車150分",
+    "name": "稲取赤尾ホテル",
+    "closed": "",
+    "main_site": "https://www.akao-hotel.co.jp/",
+    "sub_site": "",
+    "ido": "34.7695423464397",
+    "keido": "139.046279996982",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [136.843891470548,35.0506262117195 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "遊園地",
+    "hours": "不定",
+    "description": "車180分",
+    "name": "レゴランド",
+    "closed": "不定休",
+    "main_site": "https://www.legoland.jp/",
+    "sub_site": "",
+    "ido": "35.0506262117195",
+    "keido": "136.843891470548",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.912755997013,35.6508658183717 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "ホテル",
+    "hours": "不定",
+    "description": "車80分",
+    "name": "オリエンタルホテル東京ベイ",
+    "closed": "不定休",
+    "main_site": "https://www.oriental-hotel.co.jp/",
+    "sub_site": "",
+    "ido": "35.6508658183717",
+    "keido": "139.912755997013",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.229887979854,36.1404454831302 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "公園",
+    "hours": "",
+    "description": "車90分",
+    "name": "誠和くん家",
+    "closed": "",
+    "main_site": "",
+    "sub_site": "",
+    "ido": "36.1404454831302",
+    "keido": "139.229887979854",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [136.977537726415,35.1601745471474 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "動物園",
+    "hours": "9:00-16:50",
+    "description": "車、新幹線200分",
+    "name": "東山動物園",
+    "closed": "月曜日、年末年始",
+    "main_site": "https://www.higashiyama.city.nagoya.jp/",
+    "sub_site": "",
+    "ido": "35.1601745471474",
+    "keido": "136.977537726415",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [136.883439551614,35.0917618665684 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "水族館",
+    "hours": "9:00-17:30",
+    "description": "車、新幹線210分",
+    "name": "名古屋港水族館",
+    "closed": "月曜日、年末年始",
+    "main_site": "https://nagoyaaqua.jp/",
+    "sub_site": "",
+    "ido": "35.0917618665684",
+    "keido": "136.883439551614",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.094157108636,34.9861517699052 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "9:00-18:00",
+    "description": "車100分",
+    "name": "道の駅伊東マリンタウン",
+    "closed": "不定休",
+    "main_site": "https://ito-marinetown.co.jp/",
+    "sub_site": "",
+    "ido": "34.9861517699052",
+    "keido": "139.094157108636",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.941178108963,35.2476428632126 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "牧場",
+    "hours": "不定",
+    "description": "車110分",
+    "name": "マザー牧場",
+    "closed": "不定休",
+    "main_site": "https://www.motherfarm.co.jp/",
+    "sub_site": "",
+    "ido": "35.2476428632126",
+    "keido": "139.941178108963",
+    "storeid": ""
+    }
+    },
+    {
+    "geometry": {
+    "type": "Point",
+    "coordinates": [139.873149384633,35.4649770608246 ]
+    },
+    "type": "Feature",
+    "properties": {
+    "category": "その他",
+    "hours": "7:00-20:00",
+    "description": "車",
+    "name": "海ほたる",
+    "closed": "年中無休",
+    "main_site": "https://www.umihotaru.com/",
+    "sub_site": "",
+    "ido": "35.4649770608246",
+    "keido": "139.873149384633",
+    "storeid": ""
+    }
+    }
+    ]
+    }
+    
