@@ -30,7 +30,7 @@
   <script>
     // Loader を UMD 形式で使用
     const loader = new google.maps.plugins.loader.Loader({
-      apiKey: "AIzaSyAOt_zaWcDh2x8yNprbwL2qvnRjzOrPaq0", // ← あなたのAPIキー
+      apiKey: "AIzaSyAOt_zaWcDh2x8yNprbwL2qvnRjzOrPaq0", // ← あなたのAPIキーを設定
       version: "weekly",
     });
 
@@ -41,10 +41,10 @@
         zoom: 12,
       });
 
-      // GeoJSONを読み込み
+      // === GeoJSONを読み込み ===
       map.data.loadGeoJson("stores.json", { idPropertyName: "storeid" });
 
-      // マーカーアイコン設定
+      // === マーカーアイコン設定 ===
       map.data.setStyle((feature) => ({
         icon: {
           url: `img/icon_${feature.getProperty("category")}.png`,
@@ -54,7 +54,7 @@
 
       const infoWindow = new google.maps.InfoWindow();
 
-      // マーカークリック時の情報ウィンドウ
+      // === マーカークリック時の情報ウィンドウ ===
       map.data.addListener("click", (event) => {
         const category = event.feature.getProperty("category");
         const name = event.feature.getProperty("name");
@@ -91,6 +91,41 @@
         infoWindow.setOptions({ pixelOffset: new google.maps.Size(0, -30) });
         infoWindow.open(map);
       });
+
+      // === 現在地を自動表示 ===
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userPos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+
+            // 現在地マーカーを追加
+            new google.maps.Marker({
+              position: userPos,
+              map: map,
+              title: "現在地",
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: "#4285F4",
+                fillOpacity: 1,
+                strokeColor: "#fff",
+                strokeWeight: 2,
+              },
+            });
+
+            // 地図を現在地に移動
+            map.setCenter(userPos);
+          },
+          (error) => {
+            console.warn("現在地が取得できませんでした: ", error.message);
+          }
+        );
+      } else {
+        console.warn("このブラウザは位置情報をサポートしていません。");
+      }
     });
   </script>
 </body>
