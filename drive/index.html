@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="description" content="お出かけ先一覧">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>お出かけ先一覧（カテゴリ＋履歴対応）</title>
+  <title>お出かけ先一覧（カテゴリ＋履歴対応＋詳細リンク）</title>
 
   <style>
     :root {
@@ -41,7 +41,7 @@
       left: 12px;
       right: 12px;
       bottom: 12px;
-      height: 260px;
+      height: 320px; /* ← 高さ拡大 */
       background: rgba(255,255,255,0.98);
       border-radius: 12px;
       box-shadow: 0 6px 18px rgba(0,0,0,0.15);
@@ -50,7 +50,9 @@
       flex-direction: column;
       transition: transform 0.3s ease;
     }
-    #bottomPanel.minimized { transform: translateY(calc(100% - 40px)); }
+    #bottomPanel.minimized {
+      transform: translateY(calc(100% - 40px));
+    }
 
     .toolbar {
       display: flex;
@@ -72,12 +74,17 @@
       color: var(--accent);
       border: 1px solid rgba(66,133,244,0.3);
     }
+
     .filter-bar {
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      padding: 0 10px 10px 10px;
+      padding: 0 10px 12px 10px;
+      flex-shrink: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) #eee;
     }
+
     .filter-btn {
       padding: 6px 10px;
       border-radius: 8px;
@@ -86,6 +93,7 @@
       cursor: pointer;
       font-size: 13px;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .filter-btn.active {
       background: var(--accent);
@@ -95,6 +103,7 @@
     #list, #listMobile {
       overflow: auto;
       padding: 8px;
+      flex: 1;
     }
 
     .list-item {
@@ -217,15 +226,34 @@
 
     function showInfo(f) {
       const pos = f.getGeometry().get();
+      const name = f.getProperty("name");
+      const description = f.getProperty("description");
+      const category = f.getProperty("category");
+      const hours = f.getProperty("hours");
+      const closed = f.getProperty("closed");
+      const main_site = f.getProperty("main_site");
+      const sub_site = f.getProperty("sub_site");
+      const ido = f.getProperty("ido");
+      const keido = f.getProperty("keido");
+
       const html = `
-        <img style="float:left; width:50px; margin:6px;" src="img/logo_${f.getProperty("category")}.png">
-        <div style="margin-left:60px;">
-          <h2 style="font-size:16px; margin:0;">${f.getProperty("name")}</h2>
-          <p style="font-size:13px;">${f.getProperty("description")}</p>
-          <a href="https://www.google.com/maps/dir/?api=1&destination=${f.getProperty("ido")},${f.getProperty("keido")}" target="_blank">
-            Google Mapで開く
-          </a>
-        </div>`;
+        <img style="float:left; width:50px; margin:6px;" src="img/logo_${category}.png">
+        <div style="margin-left:60px; max-width:280px;">
+          <h2 style="font-size:16px; margin:0;">${name}</h2>
+          <p style="font-size:13px;">${description}</p>
+          <p style="font-size:12px;"><b>Open:</b> ${hours || '-'}<br><b>Closed:</b> ${closed || '-'}</p>
+          <p style="font-size:13px;">
+            <a href="${main_site}" target="_blank"><b>公式サイト</b></a><br>
+            <a href="${sub_site}" target="_blank"><b>参考サイト</b></a><br>
+            <a href="yjcarnavi://navi/select?lat=${ido}&lon=${keido}&name=${name}">
+              <b>車で向かう（Yahooカーナビ）</b>
+            </a><br>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${ido},${keido}&travelmode=walking" target="_blank">
+              <b>徒歩で向かう（GoogleMap）</b>
+            </a>
+          </p>
+        </div>
+      `;
       infoWindow.setContent(html);
       infoWindow.setPosition(pos);
       infoWindow.open(map);
