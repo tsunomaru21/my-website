@@ -101,18 +101,14 @@
               lng: position.coords.longitude,
             };
 
-            // 現在地マーカーを追加
+            // ✅ 現在地マーカーを確実に表示（Google公式青マーカー）
             new google.maps.Marker({
               position: userPos,
               map: map,
               title: "現在地",
               icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 8,
-                fillColor: "#4285F4",
-                fillOpacity: 1,
-                strokeColor: "#fff",
-                strokeWeight: 2,
+                url: "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png",
+                scaledSize: new google.maps.Size(40, 40),
               },
             });
 
