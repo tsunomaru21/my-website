@@ -2,123 +2,463 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="recipe">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0">
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  <link rel="apple-touch-icon" href="icon.png" sizes="180x180">
-  <title>お出かけ先一覧</title>
+  <meta name="description" content="お出かけ先一覧">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>お出かけ先一覧（カテゴリフィルタ + 距離順）</title>
 
   <style>
-    #map {
-      height: 100%;
+    /* レイアウト */
+    :root {
+      --sidebar-width: 320px;
+      --panel-height: 260px;
+      --accent: #4285F4;
+      --muted: #666;
     }
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    #app {
+      display: flex;
+      height: 100%;
+      width: 100%;
+    }
+
+    /* サイドバー（デスクトップ） */
+    #sidebar {
+      width: var(--sidebar-width);
+      min-width: 240px;
+      max-width: 420px;
+      background: #fff;
+      border-right: 1px solid #eee;
+      box-sizing: border-box;
+      padding: 12px;
+      overflow: auto;
+      display: none; /* default hide on small screens */
+    }
+
+    /* マップ領域 */
+    #map {
+      flex: 1;
+      height: 100%;
+    }
+
+    /* 下部パネル（モバイル） */
+    #bottomPanel {
+      display: none;
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: var(--panel-height);
+      background: rgba(255,255,255,0.98);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 共通UI */
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    h3 { margin: 0 0 8px 0; font-size: 16px; }
+    .filters { display:flex; flex-direction: column; gap:6px; max-height: 160px; overflow:auto; padding-right:6px; }
+    label.filter-item { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--muted); }
+
+    /* リスト */
+    #list {
+      margin-top: 8px;
+      overflow:auto;
+    }
+    .list-item {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #eee;
+      margin-bottom: 8px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      cursor:pointer;
+      background: #fff;
+    }
+    .list-item:hover { background:#f3f8ff; border-color: #e2f0ff; }
+    .list-item img { width:48px; height:48px; object-fit:cover; border-radius:6px; }
+    .list-item .meta { flex:1; }
+    .list-item .meta h4 { margin:0 0 6px 0; font-size:15px; }
+    .list-item .meta p { margin:0; font-size:13px; color:var(--muted); }
+    .distance { font-weight:600; color:var(--accent); font-size:13px; white-space:nowrap; }
+
+    /* toolbar */
+    .toolbar {
+      display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px;
+    }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border:none;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .btn.ghost { background:transparent; color:var(--accent); border:1px solid rgba(66,133,244,0.15); }
+
+    /* レスポンシブ */
+    @media (min-width: 900px) {
+      #sidebar { display:block; }
+      #bottomPanel { display:none; }
+      #map { position: relative; }
+    }
+    @media (max-width: 899px) {
+      #sidebar { display:none; }
+      #bottomPanel { display:flex; }
+      #map { position: absolute; inset:0; }
     }
   </style>
 </head>
 
 <body>
-  <div id="map"></div>
+  <div id="app">
+    <aside id="sidebar" aria-hidden="false">
+      <div class="toolbar">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <h3>お出かけ先</h3>
+          <small id="count" style="color:var(--muted); font-size:13px;"></small>
+        </div>
+        <button id="locBtn" class="btn ghost" title="現在地に移動">自分の場所へ</button>
+      </div>
 
+      <div style="margin-bottom:8px;">
+        <strong style="font-size:13px; color:#333">カテゴリで絞る</strong>
+        <div class="filters" id="filters"></div>
+      </div>
+
+      <div>
+        <strong style="font-size:13px; color:#333">距離順リスト</strong>
+        <div id="list" style="margin-top:8px;"></div>
+      </div>
+    </aside>
+
+    <div id="map" role="application" aria-label="お出かけマップ"></div>
+
+    <!-- モバイル用下部パネル -->
+    <div id="bottomPanel" aria-hidden="false">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:10px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <h3 style="font-size:16px; margin:0;">お出かけ先</h3>
+          <small id="countMobile" style="color:var(--muted); font-size:13px;"></small>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button id="locBtnMobile" class="btn ghost" title="現在地に移動">現在地</button>
+          <button id="openFiltersMobile" class="btn">フィルタ</button>
+        </div>
+      </div>
+      <div style="padding:0 10px 10px 10px; overflow:hidden; flex:1; display:flex; gap:10px;">
+        <div id="mobileFiltersArea" style="flex:0 0 38%; overflow:auto; border-right:1px solid #eee; padding-right:8px; display:none;">
+          <div style="padding-top:6px;"><strong style="font-size:13px;">カテゴリ</strong></div>
+          <div class="filters" id="filtersMobile"></div>
+        </div>
+        <div id="mobileListArea" style="flex:1; overflow:auto;">
+          <div id="listMobile" style="padding-top:6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Loader (UMD) -->
   <script src="https://cdn.jsdelivr.net/npm/@googlemaps/js-api-loader@1.16.6/dist/index.umd.min.js"></script>
 
   <script>
+    // ----- 設定 -----
+    const API_KEY = "AIzaSyAOt_zaWcDh2x8yNprbwL2qvnRjzOrPaq0"; // ← あなたのAPIキーに置き換えてください
+    const DEFAULT_CENTER = { lat: 35.457, lng: 139.395 };
+
+    // UI要素
+    const filtersEl = document.getElementById('filters');
+    const filtersMobileEl = document.getElementById('filtersMobile');
+    const listEl = document.getElementById('list');
+    const listMobileEl = document.getElementById('listMobile');
+    const countEl = document.getElementById('count');
+    const countMobileEl = document.getElementById('countMobile');
+    const locBtn = document.getElementById('locBtn');
+    const locBtnMobile = document.getElementById('locBtnMobile');
+    const openFiltersMobile = document.getElementById('openFiltersMobile');
+    const mobileFiltersArea = document.getElementById('mobileFiltersArea');
+
+    // 状態
+    let map, infoWindow;
+    let userPos = null; // {lat, lng} or null
+    let allFeatures = []; // データレイヤーの features
+    let activeCategories = new Set(); // フィルタ選択中カテゴリ（空=全表示）
+
+    // Loader 初期化
     const loader = new google.maps.plugins.loader.Loader({
-      apiKey: "AIzaSyAOt_zaWcDh2x8yNprbwL2qvnRjzOrPaq0", // ← あなたのAPIキーを設定
+      apiKey: API_KEY,
       version: "weekly",
+      libraries: [] // geometryが不要なので空
     });
 
+    // 距離計算（ハバースィン） - 結果はメートル
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const toRad = v => v * Math.PI / 180;
+      const R = 6371000; // m
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function formatDistance(m) {
+      if (m >= 1000) return (m/1000).toFixed(1) + ' km';
+      return Math.round(m) + ' m';
+    }
+
+    // サイド/モバイルのリスト描画
+    function renderList(features) {
+      // features は { feature, distance } の配列
+      features.sort((a,b) => a.distance - b.distance);
+
+      function makeItemHTML(fData) {
+        const name = fData.feature.getProperty('name') || '（名前なし）';
+        const desc = fData.feature.getProperty('description') || '';
+        const cat = fData.feature.getProperty('category') || '';
+        const imgUrl = `img/icon_${cat}.png`;
+        const distText = formatDistance(fData.distance);
+        // return DOM element
+        const wrapper = document.createElement('div');
+        wrapper.className = 'list-item';
+        wrapper.innerHTML = `
+          <img src="${imgUrl}" alt="${cat}">
+          <div class="meta">
+            <h4>${name}</h4>
+            <p>${desc}</p>
+          </div>
+          <div class="distance">${distText}</div>
+        `;
+        // click opens infoWindow on map
+        wrapper.addEventListener('click', () => {
+          const geom = fData.feature.getGeometry();
+          const pos = geom.get();
+          // center and open info window (reuse infoWindow)
+          const content = buildInfoContent(fData.feature);
+          infoWindow.setContent(content);
+          infoWindow.setPosition(pos);
+          infoWindow.setOptions({pixelOffset: new google.maps.Size(0, -30)});
+          infoWindow.open(map);
+          map.panTo(pos);
+          map.setZoom(Math.max(map.getZoom(), 14));
+        });
+        return wrapper;
+      }
+
+      // desktop
+      listEl.innerHTML = '';
+      // mobile
+      listMobileEl.innerHTML = '';
+      for (const f of features) {
+        const el = makeItemHTML(f);
+        const elClone = el.cloneNode(true);
+        listEl.appendChild(el);
+        listMobileEl.appendChild(elClone);
+      }
+      countEl.textContent = `(${features.length}件)`;
+      countMobileEl.textContent = `(${features.length})`;
+    }
+
+    // InfoWindow 内容をビルド（app.js と同等）
+    function buildInfoContent(feature) {
+      const category = feature.getProperty('category');
+      const name = feature.getProperty('name');
+      const description = feature.getProperty('description') || '';
+      const hours = feature.getProperty('hours') || '';
+      const main_site = feature.getProperty('main_site') || '#';
+      const sub_site = feature.getProperty('sub_site') || '#';
+      const closed = feature.getProperty('closed') || '';
+      const ido = feature.getProperty('ido') || '';
+      const keido = feature.getProperty('keido') || '';
+
+      return `
+        <img style="float:left; width:50px; margin-top:6px; margin-right:10px" src="img/logo_${category}.png">
+        <div style="margin-left:0; margin-bottom:6px; max-width:260px;">
+          <h2 style="margin:0 0 6px 0; font-size:16px;">${name}</h2>
+          <p style="margin:0 0 6px 0; color:${'var(--muted)'};">${description}</p>
+          <p style="margin:0; font-size:13px;">
+            <b>Open:</b> ${hours}<br/>
+            <b>Closed:</b> ${closed}<br/>
+            <a href="${main_site}" target="_blank"><b>公式サイト</b></a><br/>
+            <a href="${sub_site}" target="_blank"><b>参考サイト</b></a><br/>
+            <a href="yjcarnavi://navi/select?lat=${ido}&lon=${keido}&name=${name}"><b>車で向かう（Yahooカーナビ）</b></a><br/>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${ido},${keido}&travelmode=walking" target="_blank"><b>徒歩で向かう（GoogleMap）</b></a>
+          </p>
+        </div>
+      `;
+    }
+
+    // フィルタ適用（map上の表示切替）
+    function applyFiltersAndRender() {
+      // collect visible features with computed distance
+      const arr = [];
+      map.data.forEach((feature) => {
+        const cat = feature.getProperty('category') || '';
+        if (activeCategories.size > 0 && !activeCategories.has(cat)) {
+          // hide on map
+          map.data.overrideStyle(feature, { visible: false });
+          return;
+        } else {
+          map.data.revertStyle(feature);
+        }
+
+        const geom = feature.getGeometry();
+        if (!geom) return;
+        const pos = geom.get();
+        let dist = 0;
+        if (userPos) {
+          dist = haversineDistance(userPos.lat, userPos.lng, pos.lat, pos.lng);
+        } else {
+          dist = haversineDistance(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, pos.lat, pos.lng);
+        }
+        arr.push({ feature, distance: dist });
+      });
+
+      renderList(arr);
+    }
+
+    // カテゴリUI作成
+    function buildCategoryUI(categories) {
+      // categories: array of strings
+      filtersEl.innerHTML = '';
+      filtersMobileEl.innerHTML = '';
+
+      categories.forEach(cat => {
+        const id = 'cat_' + cat.replace(/\s+/g,'_');
+        const label = document.createElement('label');
+        label.className = 'filter-item';
+        label.innerHTML = `<input type="checkbox" value="${cat}" id="${id}"> ${cat}`;
+        filtersEl.appendChild(label);
+
+        const label2 = label.cloneNode(true);
+        filtersMobileEl.appendChild(label2);
+
+        // add event
+        const cb = label.querySelector('input');
+        const cb2 = label2.querySelector('input');
+        cb.addEventListener('change', (e) => {
+          if (e.target.checked) activeCategories.add(cat); else activeCategories.delete(cat);
+          applyFiltersAndRender();
+        });
+        cb2.addEventListener('change', (e) => {
+          if (e.target.checked) activeCategories.add(cat); else activeCategories.delete(cat);
+          // sync desktop checkbox if exists
+          const desktopCb = document.getElementById(id);
+          if (desktopCb && desktopCb !== e.target) desktopCb.checked = e.target.checked;
+          applyFiltersAndRender();
+        });
+      });
+    }
+
+    // 現在地取得（ボタン・自動）
+    function locateAndCenter(showMarker = true, fallbackNoAlert = false) {
+      if (!navigator.geolocation) {
+        if(!fallbackNoAlert) alert('このブラウザは位置情報をサポートしていません。');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition((pos) => {
+        userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        // add marker
+        new google.maps.Marker({
+          position: userPos,
+          map: map,
+          title: "現在地",
+          icon: {
+            url: "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png",
+            scaledSize: new google.maps.Size(40, 40),
+          },
+        });
+        map.setCenter(userPos);
+        map.setZoom(Math.max(map.getZoom(), 13));
+        applyFiltersAndRender();
+      }, (error) => {
+        console.warn('現在地取得エラー:', error);
+        // 位置情報拒否などはここで処理。距離はデフォルト中心で算出。
+        userPos = null;
+        if (error && error.code === 1 && !fallbackNoAlert) {
+          alert('位置情報の許可が必要です。ブラウザのサイト設定で許可してください。');
+        } else if (!fallbackNoAlert) {
+          alert('現在地が取得できませんでした（位置情報未利用）。デフォルト中心で表示します。');
+        }
+        applyFiltersAndRender();
+      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    }
+
+    // 初期化
     loader.load().then(() => {
-      const map = new google.maps.Map(document.getElementById("map"), {
+      map = new google.maps.Map(document.getElementById('map'), {
         mapId: "1df09633b5c319c7",
-        center: { lat: 35.457, lng: 139.395 },
+        center: DEFAULT_CENTER,
         zoom: 12,
       });
 
-      // GeoJSONを読み込み
-      map.data.loadGeoJson("stores.json", { idPropertyName: "storeid" });
-      map.data.setStyle((feature) => ({
-        icon: {
-          url: `img/icon_${feature.getProperty("category")}.png`,
-          scaledSize: new google.maps.Size(32, 32),
-        },
-      }));
+      infoWindow = new google.maps.InfoWindow();
 
-      const infoWindow = new google.maps.InfoWindow();
+      // GeoJSON を読み込んでコールバックで features を取得
+      map.data.loadGeoJson('stores.json', { idPropertyName: 'storeid' }, (features) => {
+        // features は配列。collect categories
+        allFeatures = features;
+        const catSet = new Set();
+        features.forEach(f => {
+          const c = f.getProperty('category') || '未分類';
+          catSet.add(c);
+        });
+        const categories = Array.from(catSet).sort();
 
-      map.data.addListener("click", (event) => {
-        const category = event.feature.getProperty("category");
-        const name = event.feature.getProperty("name");
-        const description = event.feature.getProperty("description");
-        const hours = event.feature.getProperty("hours");
-        const main_site = event.feature.getProperty("main_site");
-        const sub_site = event.feature.getProperty("sub_site");
-        const closed = event.feature.getProperty("closed");
-        const ido = event.feature.getProperty("ido");
-        const keido = event.feature.getProperty("keido");
+        // UI作成
+        buildCategoryUI(categories);
+
+        // デフォルトは全表示
+        activeCategories = new Set();
+
+        // 最初に現在地取得（自動）
+        locateAndCenter(true, true);
+
+        // 初回リスト描画（距離はデフォルト中心時）
+        applyFiltersAndRender();
+      });
+
+      // data layer click handler (既存と同様)
+      map.data.addListener('click', (event) => {
+        const content = buildInfoContent(event.feature);
         const position = event.feature.getGeometry().get();
-
-        const content = `
-          <img style="float:left; width:50px; margin-top:20px" src="img/logo_${category}.png">
-          <div style="margin-left:20px; margin-bottom:20px;">
-            <h2>${name}</h2><p>${description}</p>
-            <p>
-              <b>Open:</b> ${hours} <br/>
-              <b>Closed:</b> ${closed}<br/>
-              <a href="${main_site}" target="_blank"><b>公式サイト</b></a><br/>
-              <a href="${sub_site}" target="_blank"><b>参考サイト</b></a><br/>
-              <a href="yjcarnavi://navi/select?lat=${ido}&lon=${keido}&name=${name}">
-                <b>車で向かう（Yahooカーナビ）</b>
-              </a><br/>
-              <a href="https://www.google.com/maps/dir/?api=1&destination=${ido},${keido}&travelmode=walking" target="_blank">
-                <b>徒歩で向かう（GoogleMap）</b>
-              </a>
-            </p>
-          </div>
-        `;
-
         infoWindow.setContent(content);
         infoWindow.setPosition(position);
-        infoWindow.setOptions({ pixelOffset: new google.maps.Size(0, -30) });
+        infoWindow.setOptions({pixelOffset: new google.maps.Size(0, -30)});
         infoWindow.open(map);
       });
 
-      // === 現在地を自動表示 ===
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const userPos = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
+      // UI ボタン
+      locBtn.addEventListener('click', () => locateAndCenter());
+      locBtnMobile.addEventListener('click', () => locateAndCenter());
+      openFiltersMobile.addEventListener('click', () => {
+        mobileFiltersArea.style.display = mobileFiltersArea.style.display === 'block' ? 'none' : 'block';
+      });
+    }).catch(err => {
+      console.error('Loader error:', err);
+      alert('地図の読み込みでエラーが発生しました。コンソールを確認してください。');
+    });
 
-            console.log("現在地取得成功:", userPos);
-
-            // ✅ 青い丸マーカー
-            new google.maps.Marker({
-              position: userPos,
-              map: map,
-              title: "現在地",
-              icon: {
-                url: "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png",
-                scaledSize: new google.maps.Size(40, 40),
-              },
-            });
-
-            map.setCenter(userPos);
-          },
-          (error) => {
-            console.error("現在地取得エラー:", error);
-            alert("現在地が取得できませんでした。\n" + error.message);
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-      } else {
-        console.warn("このブラウザは位置情報をサポートしていません。");
-      }
+    // 画面回転などでマップをリサイズ
+    window.addEventListener('resize', () => {
+      if (map) google.maps.event.trigger(map, 'resize');
     });
   </script>
 </body>
