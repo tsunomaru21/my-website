@@ -9,7 +9,6 @@
   <title>お出かけ先一覧</title>
 
   <style>
-    /* drive.css */
     #map {
       height: 100%;
     }
@@ -24,11 +23,9 @@
 <body>
   <div id="map"></div>
 
-  <!-- ✅ Google公式LoaderをCDNスクリプトとして読み込む -->
   <script src="https://cdn.jsdelivr.net/npm/@googlemaps/js-api-loader@1.16.6/dist/index.umd.min.js"></script>
 
   <script>
-    // Loader を UMD 形式で使用
     const loader = new google.maps.plugins.loader.Loader({
       apiKey: "AIzaSyAOt_zaWcDh2x8yNprbwL2qvnRjzOrPaq0", // ← あなたのAPIキーを設定
       version: "weekly",
@@ -41,10 +38,8 @@
         zoom: 12,
       });
 
-      // === GeoJSONを読み込み ===
+      // GeoJSONを読み込み
       map.data.loadGeoJson("stores.json", { idPropertyName: "storeid" });
-
-      // === マーカーアイコン設定 ===
       map.data.setStyle((feature) => ({
         icon: {
           url: `img/icon_${feature.getProperty("category")}.png`,
@@ -54,7 +49,6 @@
 
       const infoWindow = new google.maps.InfoWindow();
 
-      // === マーカークリック時の情報ウィンドウ ===
       map.data.addListener("click", (event) => {
         const category = event.feature.getProperty("category");
         const name = event.feature.getProperty("name");
@@ -101,7 +95,9 @@
               lng: position.coords.longitude,
             };
 
-            // ✅ 現在地マーカーを確実に表示（Google公式青マーカー）
+            console.log("現在地取得成功:", userPos);
+
+            // ✅ 青い丸マーカー
             new google.maps.Marker({
               position: userPos,
               map: map,
@@ -112,12 +108,13 @@
               },
             });
 
-            // 地図を現在地に移動
             map.setCenter(userPos);
           },
           (error) => {
-            console.warn("現在地が取得できませんでした: ", error.message);
-          }
+            console.error("現在地取得エラー:", error);
+            alert("現在地が取得できませんでした。\n" + error.message);
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
       } else {
         console.warn("このブラウザは位置情報をサポートしていません。");
