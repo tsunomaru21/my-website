@@ -11,14 +11,15 @@
       background: #f9fafb;
       color: #333;
     }
+
+    /* === 上部構造 === */
     header {
       background: #ff7043;
       color: #fff;
       text-align: center;
+    }
+    header .title-area {
       padding: 1.2rem 0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
     }
     header h1 {
       margin: 0;
@@ -29,12 +30,27 @@
       opacity: 0.9;
       margin-top: 0.3rem;
     }
+
+    /* === 固定されるエリア === */
+    .sticky-controls {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ff7043;
+      padding: 0.6rem 0 0.8rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 人気タグ */
     .popular-tags {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 0.4rem;
-      margin-top: 0.6rem;
+      margin-top: 0.4rem;
     }
     .popular-tag {
       background: rgba(255, 255, 255, 0.25);
@@ -42,18 +58,19 @@
       padding: 0.25rem 0.6rem;
       border-radius: 999px;
       cursor: pointer;
+      font-size: 0.9rem;
     }
 
-    /* 検索＋ソートをスマホでも1行に収めるレイアウト */
+    /* 検索＋ソート行 */
     .controls {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
       gap: 0.5rem;
-      margin: 1rem auto;
       max-width: 600px;
       padding: 0 1rem;
+      margin-bottom: 0.3rem;
     }
     .controls input[type="text"] {
       flex: 1;
@@ -92,7 +109,7 @@
       }
     }
 
-    /* レシピカード部分 */
+    /* === レシピカード === */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -169,20 +186,23 @@
 </head>
 <body>
   <header>
-    <h1>🍳 レシピメモ</h1>
-    <div class="version">ver: 2025-10-12-idbased-v3</div>
-    <div class="popular-tags" id="popularTags"></div>
+    <div class="title-area">
+      <h1>🍳 レシピメモ</h1>
+      <div class="version">ver: 2025-10-12-idbased-v3</div>
+    </div>
+    <div class="sticky-controls">
+      <div class="controls">
+        <input id="search" type="text" placeholder="レシピ名・材料で検索" />
+        <button id="clearSearchBtn">❌</button>
+        <select id="sort">
+          <option value="default">デフォルト</option>
+          <option value="popular">人気順</option>
+          <option value="recent">最近見た順</option>
+        </select>
+      </div>
+      <div class="popular-tags" id="popularTags"></div>
+    </div>
   </header>
-
-  <div class="controls">
-    <input id="search" type="text" placeholder="レシピ名・材料で検索" />
-    <button id="clearSearchBtn">❌</button>
-    <select id="sort">
-      <option value="default">デフォルト</option>
-      <option value="popular">人気順</option>
-      <option value="recent">最近見た順</option>
-    </select>
-  </div>
 
   <div class="grid" id="recipeGrid"></div>
 
