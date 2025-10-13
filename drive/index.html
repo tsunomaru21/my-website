@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="description" content="お出かけ先一覧">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>お出かけ先一覧（カテゴリ＋履歴対応＋詳細リンク）</title>
+  <title>お出かけ先一覧（距離順ソート対応）</title>
 
   <style>
     :root {
@@ -41,7 +41,7 @@
       left: 12px;
       right: 12px;
       bottom: 12px;
-      height: 320px; /* ← 高さ拡大 */
+      height: 320px;
       background: rgba(255,255,255,0.98);
       border-radius: 12px;
       box-shadow: 0 6px 18px rgba(0,0,0,0.15);
@@ -194,7 +194,22 @@
       return m >= 1000 ? (m / 1000).toFixed(1) + " km" : Math.round(m) + " m";
     }
 
+    // ✅ 距離順に並べる機能追加
+    function sortByDistance(features) {
+      return [...features].sort((a, b) => {
+        const getDist = f => {
+          const pos = f.getGeometry().get();
+          const base = userPos || DEFAULT_CENTER;
+          return haversine(base.lat, base.lng, pos.lat(), pos.lng());
+        };
+        return getDist(a) - getDist(b);
+      });
+    }
+
     function renderList(features) {
+      // ✅ 距離順でソート
+      const sorted = sortByDistance(features);
+
       const makeItem = (f, dist) => {
         const cat = f.getProperty("category");
         const img = `img/icon_${cat}.png`;
@@ -213,16 +228,18 @@
 
       listEl.innerHTML = "";
       listMobileEl.innerHTML = "";
-      features.forEach(f => {
+
+      sorted.forEach(f => {
         const pos = f.getGeometry().get();
-        const dist = userPos
-          ? haversine(userPos.lat, userPos.lng, pos.lat(), pos.lng())
-          : haversine(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, pos.lat(), pos.lng());
+        const base = userPos || DEFAULT_CENTER;
+        const dist = haversine(base.lat, base.lng, pos.lat(), pos.lng());
         const el = makeItem(f, dist);
         listEl.appendChild(el.cloneNode(true));
         listMobileEl.appendChild(el);
       });
     }
+
+    // （以下、その他関数 showInfo / renderFilters / applyFilter / locate は前回と同様）
 
     function showInfo(f) {
       const pos = f.getGeometry().get();
@@ -257,7 +274,6 @@
       infoWindow.setContent(html);
       infoWindow.setPosition(pos);
       infoWindow.open(map);
-      updateHistory(f.getProperty("storeid"));
     }
 
     function renderFilters(categories) {
@@ -283,29 +299,10 @@
       const filtered = cat === "すべて"
         ? allFeatures
         : allFeatures.filter(f => f.getProperty("category") === cat);
-      renderList(orderByHistory(filtered));
+      renderList(filtered);
       map.data.forEach(f => map.data.overrideStyle(f, {
         visible: cat === "すべて" || f.getProperty("category") === cat
       }));
-    }
-
-    function updateHistory(id) {
-      let history = JSON.parse(localStorage.getItem("visitedPlaces") || "[]");
-      history = history.filter(x => x !== id);
-      history.unshift(id);
-      localStorage.setItem("visitedPlaces", JSON.stringify(history));
-    }
-
-    function orderByHistory(features) {
-      const history = JSON.parse(localStorage.getItem("visitedPlaces") || "[]");
-      return [...features].sort((a, b) => {
-        const ia = history.indexOf(a.getProperty("storeid"));
-        const ib = history.indexOf(b.getProperty("storeid"));
-        if (ia === -1 && ib === -1) return 0;
-        if (ia === -1) return 1;
-        if (ib === -1) return -1;
-        return ia - ib;
-      });
     }
 
     function locate() {
@@ -317,7 +314,7 @@
           icon: { url: "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png", scaledSize: new google.maps.Size(40, 40) }
         });
         map.setCenter(userPos);
-        renderList(orderByHistory(allFeatures));
+        renderList(allFeatures);
       });
     }
 
@@ -339,11 +336,10 @@
             scaledSize: new google.maps.Size(32, 32)
           }
         }));
-        renderList(orderByHistory(features));
+        renderList(features); // ✅ 初期表示も距離順
       });
 
       map.data.addListener("click", e => showInfo(e.feature));
-
       locate();
     });
 
