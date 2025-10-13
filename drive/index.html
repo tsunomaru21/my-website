@@ -9,7 +9,6 @@
   <title>お出かけ先一覧</title>
 
   <style>
-    /* ▼ drive.css 統合 ▼ */
     #map {
       height: 100%;
     }
@@ -24,18 +23,16 @@
 <body>
   <div id="map"></div>
 
-  <!-- ▼ 新しい Maps JavaScript API ロード方式 ▼ -->
+  <!-- ✅ 正しい Loader モジュールを CDN から読み込む -->
   <script type="module">
-    import { Loader } from "https://maps.googleapis.com/maps/api/js";
+    import { Loader } from "https://cdn.jsdelivr.net/npm/@googlemaps/js-api-loader@1.16.6/dist/index.min.js";
 
     const loader = new Loader({
-      apiKey: "AIzaSyAOt_zaWcDh2x8yNprbwL2qvnRjzOrPaq0", // ← あなたのAPIキーをここに入れてください
+      apiKey: "AIzaSyAOt_zaWcDh2x8yNprbwL2qvnRjzOrPaq0", // ← あなたのAPIキー
       version: "weekly",
-      libraries: [],
     });
 
     loader.load().then(() => {
-      // ====== ここから app.js の内容 ======
       const map = new google.maps.Map(document.getElementById("map"), {
         mapId: "1df09633b5c319c7",
         center: { lat: 35.457, lng: 139.395 },
@@ -46,14 +43,12 @@
       map.data.loadGeoJson("stores.json", { idPropertyName: "storeid" });
 
       // マーカーアイコン設定
-      map.data.setStyle((feature) => {
-        return {
-          icon: {
-            url: `img/icon_${feature.getProperty("category")}.png`,
-            scaledSize: new google.maps.Size(32, 32),
-          },
-        };
-      });
+      map.data.setStyle((feature) => ({
+        icon: {
+          url: `img/icon_${feature.getProperty("category")}.png`,
+          scaledSize: new google.maps.Size(32, 32),
+        },
+      }));
 
       const infoWindow = new google.maps.InfoWindow();
 
@@ -94,7 +89,6 @@
         infoWindow.setOptions({ pixelOffset: new google.maps.Size(0, -30) });
         infoWindow.open(map);
       });
-      // ====== app.js 終わり ======
     });
   </script>
 </body>
