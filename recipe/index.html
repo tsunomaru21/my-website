@@ -12,65 +12,26 @@
       color: #333;
     }
 
-    /* === 上部構造 === */
-    header {
-      background: #ff7043;
-      color: #fff;
-      text-align: center;
-    }
-    header .title-area {
-      padding: 1.2rem 0;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.4rem;
-    }
-    header .version {
-      font-size: 0.8rem;
-      opacity: 0.9;
-      margin-top: 0.3rem;
-    }
-
-    /* === 固定されるエリア === */
-    .sticky-controls {
+    /* 固定バー（検索＋ソート＋タグ） */
+    .fixed-top {
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 100;
       background: #ff7043;
-      padding: 0.6rem 0 0.8rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    /* 人気タグ */
-    .popular-tags {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.4rem;
-      margin-top: 0.4rem;
-    }
-    .popular-tag {
-      background: rgba(255, 255, 255, 0.25);
       color: #fff;
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 0.9rem;
+      padding: 0.6rem 0 0.8rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* 検索＋ソート行 */
     .controls {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
       gap: 0.5rem;
+      margin: 0.4rem auto;
       max-width: 600px;
       padding: 0 1rem;
-      margin-bottom: 0.3rem;
     }
     .controls input[type="text"] {
       flex: 1;
@@ -97,19 +58,25 @@
       display: none;
     }
 
-    @media (max-width: 480px) {
-      .controls {
-        flex-wrap: nowrap;
-      }
-      .controls input[type="text"] {
-        flex: 1 1 auto;
-      }
-      .controls select {
-        width: auto;
-      }
+    .popular-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+      padding: 0 1rem;
+    }
+    .popular-tag {
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      cursor: pointer;
+      border: none;
+      font-size: 0.9rem;
     }
 
-    /* === レシピカード === */
+    /* レシピカード部分 */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -122,7 +89,7 @@
       background: #fff;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
       position: relative;
       width: 100%;
       box-sizing: border-box;
@@ -156,7 +123,7 @@
       position: absolute;
       top: 8px;
       right: 8px;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255,255,255,0.95);
       border-radius: 50%;
       padding: 6px;
       cursor: pointer;
@@ -164,6 +131,7 @@
       line-height: 1;
       user-select: none;
       transition: transform 0.12s;
+      border: none;
     }
     .favorite-btn:active {
       transform: scale(0.94);
@@ -172,37 +140,28 @@
       color: #ff4081;
     }
     @media (max-width: 600px) {
-      .recipe-card img {
-        height: 110px;
-      }
+      .recipe-card img { height: 110px; }
       .favorite-btn {
-        top: 6px;
-        right: 6px;
-        font-size: 14px;
-        padding: 5px;
+        top: 6px; right: 6px; font-size: 14px; padding: 5px;
       }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="title-area">
-      <h1>🍳 レシピメモ</h1>
-      <div class="version">ver: 2025-10-12-idbased-v3</div>
+
+  <!-- 固定バー -->
+  <div class="fixed-top">
+    <div class="controls">
+      <input id="search" type="text" placeholder="レシピ名・材料で検索" />
+      <button id="clearSearchBtn">❌</button>
+      <select id="sort">
+        <option value="default">デフォルト</option>
+        <option value="popular">人気順</option>
+        <option value="recent">最近見た順</option>
+      </select>
     </div>
-    <div class="sticky-controls">
-      <div class="controls">
-        <input id="search" type="text" placeholder="レシピ名・材料で検索" />
-        <button id="clearSearchBtn">❌</button>
-        <select id="sort">
-          <option value="default">デフォルト</option>
-          <option value="popular">人気順</option>
-          <option value="recent">最近見た順</option>
-        </select>
-      </div>
-      <div class="popular-tags" id="popularTags"></div>
-    </div>
-  </header>
+    <div class="popular-tags" id="popularTags"></div>
+  </div>
 
   <div class="grid" id="recipeGrid"></div>
 
