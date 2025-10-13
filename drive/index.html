@@ -4,12 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="description" content="お出かけ先一覧">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>お出かけ先一覧（改良版）</title>
+  <title>お出かけ先一覧（カテゴリ＋履歴対応）</title>
 
   <style>
     :root {
-      --sidebar-width: 320px;
-      --panel-height: 260px;
       --accent: #4285F4;
       --muted: #666;
     }
@@ -25,7 +23,7 @@
       width: 100%;
     }
     #sidebar {
-      width: var(--sidebar-width);
+      width: 320px;
       background: #fff;
       border-right: 1px solid #eee;
       padding: 12px;
@@ -37,14 +35,13 @@
       height: 100%;
     }
 
-    /* 下部パネル */
     #bottomPanel {
       display: none;
       position: absolute;
       left: 12px;
       right: 12px;
       bottom: 12px;
-      height: var(--panel-height);
+      height: 260px;
       background: rgba(255,255,255,0.98);
       border-radius: 12px;
       box-shadow: 0 6px 18px rgba(0,0,0,0.15);
@@ -53,9 +50,7 @@
       flex-direction: column;
       transition: transform 0.3s ease;
     }
-    #bottomPanel.minimized {
-      transform: translateY(calc(100% - 40px));
-    }
+    #bottomPanel.minimized { transform: translateY(calc(100% - 40px)); }
 
     .toolbar {
       display: flex;
@@ -76,6 +71,25 @@
       background: transparent;
       color: var(--accent);
       border: 1px solid rgba(66,133,244,0.3);
+    }
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 0 10px 10px 10px;
+    }
+    .filter-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #f1f3f5;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .filter-btn.active {
+      background: var(--accent);
+      color: #fff;
     }
 
     #list, #listMobile {
@@ -119,12 +133,12 @@
         <h3>お出かけ先一覧</h3>
         <button id="locBtn" class="btn ghost">現在地</button>
       </div>
+      <div class="filter-bar" id="filterBar"></div>
       <div id="list"></div>
     </aside>
 
     <div id="map"></div>
 
-    <!-- モバイル用下部パネル -->
     <div id="bottomPanel">
       <div class="toolbar">
         <h3 style="margin:0;">お出かけ先</h3>
@@ -133,6 +147,7 @@
           <button id="togglePanel" class="btn">↕ 最小化</button>
         </div>
       </div>
+      <div class="filter-bar" id="filterBarMobile"></div>
       <div id="listMobile"></div>
     </div>
   </div>
@@ -143,43 +158,35 @@
     const API_KEY = "AIzaSyAOt_zaWcDh2x8yNprbwL2qvnRjzOrPaq0";
     const DEFAULT_CENTER = { lat: 35.457, lng: 139.395 };
 
-    const loader = new google.maps.plugins.loader.Loader({
-      apiKey: API_KEY,
-      version: "weekly"
-    });
-
-    let map, infoWindow, userPos = null;
+    const loader = new google.maps.plugins.loader.Loader({ apiKey: API_KEY, version: "weekly" });
+    let map, infoWindow, userPos = null, allFeatures = [];
 
     const listEl = document.getElementById("list");
     const listMobileEl = document.getElementById("listMobile");
+    const filterBar = document.getElementById("filterBar");
+    const filterBarMobile = document.getElementById("filterBarMobile");
     const bottomPanel = document.getElementById("bottomPanel");
     const togglePanel = document.getElementById("togglePanel");
     const locBtn = document.getElementById("locBtn");
     const locBtnMobile = document.getElementById("locBtnMobile");
 
-    togglePanel.addEventListener("click", () => {
-      bottomPanel.classList.toggle("minimized");
-    });
+    togglePanel.addEventListener("click", () => bottomPanel.classList.toggle("minimized"));
 
-    function haversineDistance(lat1, lon1, lat2, lon2) {
+    function haversine(lat1, lon1, lat2, lon2) {
       const R = 6371000;
-      const toRad = v => v * Math.PI / 180;
+      const toRad = x => x * Math.PI / 180;
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat / 2) ** 2 +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLon / 2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
     function formatDistance(m) {
-      if (isNaN(m)) return "";
       return m >= 1000 ? (m / 1000).toFixed(1) + " km" : Math.round(m) + " m";
     }
 
     function renderList(features) {
-      const makeItem = (f, d) => {
+      const makeItem = (f, dist) => {
         const cat = f.getProperty("category");
         const img = `img/icon_${cat}.png`;
         const name = f.getProperty("name");
@@ -189,77 +196,100 @@
         el.innerHTML = `
           <img src="${img}" alt="${cat}">
           <div class="meta"><h4>${name}</h4><p>${desc}</p></div>
-          <div class="distance">${formatDistance(d)}</div>
+          <div class="distance">${formatDistance(dist)}</div>
         `;
-        el.addEventListener("click", () => {
-          const pos = f.getGeometry().get();
-          map.panTo(pos);
-          map.setZoom(Math.max(map.getZoom(), 14));
-          infoWindow.setContent(buildInfoContent(f));
-          infoWindow.setPosition(pos);
-          infoWindow.open(map);
-        });
+        el.addEventListener("click", () => showInfo(f));
         return el;
       };
+
       listEl.innerHTML = "";
       listMobileEl.innerHTML = "";
       features.forEach(f => {
         const pos = f.getGeometry().get();
-        const d = userPos
-          ? haversineDistance(userPos.lat, userPos.lng, pos.lat(), pos.lng())
-          : haversineDistance(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, pos.lat(), pos.lng());
-        listEl.appendChild(makeItem(f, d));
-        listMobileEl.appendChild(makeItem(f, d));
+        const dist = userPos
+          ? haversine(userPos.lat, userPos.lng, pos.lat(), pos.lng())
+          : haversine(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, pos.lat(), pos.lng());
+        const el = makeItem(f, dist);
+        listEl.appendChild(el.cloneNode(true));
+        listMobileEl.appendChild(el);
       });
     }
 
-    function buildInfoContent(f) {
-      const cat = f.getProperty("category");
-      const name = f.getProperty("name");
-      const desc = f.getProperty("description");
-      const hours = f.getProperty("hours");
-      const closed = f.getProperty("closed");
-      const main_site = f.getProperty("main_site");
-      const sub_site = f.getProperty("sub_site");
-      const ido = f.getProperty("ido");
-      const keido = f.getProperty("keido");
-      return `
-        <img style="float:left; width:50px; margin:6px;" src="img/logo_${cat}.png">
+    function showInfo(f) {
+      const pos = f.getGeometry().get();
+      const html = `
+        <img style="float:left; width:50px; margin:6px;" src="img/logo_${f.getProperty("category")}.png">
         <div style="margin-left:60px;">
-          <h2 style="font-size:16px; margin:0;">${name}</h2>
-          <p style="font-size:13px;">${desc}</p>
-          <p style="font-size:13px;">
-            <b>Open:</b> ${hours}<br/>
-            <b>Closed:</b> ${closed}<br/>
-            <a href="${main_site}" target="_blank"><b>公式サイト</b></a><br/>
-            <a href="${sub_site}" target="_blank"><b>参考サイト</b></a><br/>
-            <a href="yjcarnavi://navi/select?lat=${ido}&lon=${keido}&name=${name}"><b>車で向かう（Yahooカーナビ）</b></a><br/>
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${ido},${keido}&travelmode=walking" target="_blank"><b>徒歩で向かう（GoogleMap）</b></a>
-          </p>
+          <h2 style="font-size:16px; margin:0;">${f.getProperty("name")}</h2>
+          <p style="font-size:13px;">${f.getProperty("description")}</p>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=${f.getProperty("ido")},${f.getProperty("keido")}" target="_blank">
+            Google Mapで開く
+          </a>
         </div>`;
+      infoWindow.setContent(html);
+      infoWindow.setPosition(pos);
+      infoWindow.open(map);
+      updateHistory(f.getProperty("storeid"));
     }
 
-    function locateAndCenter() {
-      if (!navigator.geolocation) {
-        alert("位置情報がサポートされていません。");
-        return;
-      }
+    function renderFilters(categories) {
+      const makeBtn = (name) => {
+        const btn = document.createElement("button");
+        btn.className = "filter-btn";
+        btn.textContent = name;
+        btn.dataset.cat = name;
+        btn.addEventListener("click", () => applyFilter(name));
+        return btn;
+      };
+      [filterBar, filterBarMobile].forEach(bar => {
+        bar.innerHTML = "";
+        ["すべて", ...categories].forEach(cat => bar.appendChild(makeBtn(cat)));
+      });
+      document.querySelectorAll(".filter-btn[data-cat='すべて']").forEach(btn => btn.classList.add("active"));
+    }
+
+    function applyFilter(cat) {
+      document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.cat === cat);
+      });
+      const filtered = cat === "すべて"
+        ? allFeatures
+        : allFeatures.filter(f => f.getProperty("category") === cat);
+      renderList(orderByHistory(filtered));
+      map.data.forEach(f => map.data.overrideStyle(f, {
+        visible: cat === "すべて" || f.getProperty("category") === cat
+      }));
+    }
+
+    function updateHistory(id) {
+      let history = JSON.parse(localStorage.getItem("visitedPlaces") || "[]");
+      history = history.filter(x => x !== id);
+      history.unshift(id);
+      localStorage.setItem("visitedPlaces", JSON.stringify(history));
+    }
+
+    function orderByHistory(features) {
+      const history = JSON.parse(localStorage.getItem("visitedPlaces") || "[]");
+      return [...features].sort((a, b) => {
+        const ia = history.indexOf(a.getProperty("storeid"));
+        const ib = history.indexOf(b.getProperty("storeid"));
+        if (ia === -1 && ib === -1) return 0;
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+    }
+
+    function locate() {
+      if (!navigator.geolocation) return alert("位置情報が取得できません。");
       navigator.geolocation.getCurrentPosition(pos => {
         userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         new google.maps.Marker({
-          position: userPos,
-          map,
-          title: "現在地",
-          icon: {
-            url: "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png",
-            scaledSize: new google.maps.Size(40, 40)
-          }
+          position: userPos, map, title: "現在地",
+          icon: { url: "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png", scaledSize: new google.maps.Size(40, 40) }
         });
         map.setCenter(userPos);
-        map.setZoom(Math.max(map.getZoom(), 13));
-      }, err => {
-        console.warn("現在地エラー:", err);
-        alert("現在地が取得できませんでした。");
+        renderList(orderByHistory(allFeatures));
       });
     }
 
@@ -272,27 +302,25 @@
       infoWindow = new google.maps.InfoWindow();
 
       map.data.loadGeoJson("stores.json", { idPropertyName: "storeid" }, (features) => {
+        allFeatures = features;
+        const cats = [...new Set(features.map(f => f.getProperty("category")))];
+        renderFilters(cats);
         map.data.setStyle(f => ({
           icon: {
             url: `img/icon_${f.getProperty("category")}.png`,
             scaledSize: new google.maps.Size(32, 32)
           }
         }));
-        renderList(features);
+        renderList(orderByHistory(features));
       });
 
-      map.data.addListener("click", e => {
-        const pos = e.feature.getGeometry().get();
-        infoWindow.setContent(buildInfoContent(e.feature));
-        infoWindow.setPosition(pos);
-        infoWindow.open(map);
-      });
+      map.data.addListener("click", e => showInfo(e.feature));
 
-      locateAndCenter();
+      locate();
     });
 
-    locBtn.addEventListener("click", locateAndCenter);
-    locBtnMobile.addEventListener("click", locateAndCenter);
+    locBtn.addEventListener("click", locate);
+    locBtnMobile.addEventListener("click", locate);
   </script>
 </body>
 </html>
