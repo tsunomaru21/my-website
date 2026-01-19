@@ -1,39 +1,80 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>国旗クイズ</title>
+
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
+      margin: 0;
       padding: 20px;
     }
+
+    /* --- レスポンシブ対応 --- */
     img {
-      max-width: 200px;
+      width: 100%;
+      max-width: 250px; /* PC やタブレットでは大きく見せる */
       height: auto;
       margin-top: 20px;
     }
+
     button {
-      margin-top: 20px;
-      font-size: 1rem;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      margin: 10px;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 8px;
+      border: none;
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* タイトル画面とクイズ画面の切り替え */
+    .hidden {
+      display: none;
     }
   </style>
 </head>
+
 <body>
 
-  <h1>国旗クイズ</h1>
-  <div id="quiz">
-    <div id="flag-container">
-      <img id="flag" src="" alt="">
-    </div>
+  <!-- ▼ タイトル画面 -->
+  <div id="title-screen">
+    <h1>国旗クイズ</h1>
+    <p>レベルを選んでスタート！</p>
+
+    <button onclick="startQuiz(1)">レベル1（10問）</button>
+    <button onclick="startQuiz(2)">レベル2（20問）</button>
+    <button onclick="startQuiz(3)">レベル3（30問）</button>
+  </div>
+
+  <!-- ▼ クイズ画面 -->
+  <div id="quiz-screen" class="hidden">
+    <h1 id="quiz-title"></h1>
+
+    <img id="flag" src="" alt="flag" />
+
     <h2 id="country-name"></h2>
     <button id="next-btn">次へ</button>
     <p id="progress"></p>
   </div>
 
+  <!-- ▼ 結果画面 -->
+  <div id="result-screen" class="hidden">
+    <h1>おつかれさま！</h1>
+    <p id="result-message"></p>
+    <button onclick="goTitle()">タイトルに戻る</button>
+  </div>
+
   <script>
-    // 出題する国データ（例）※ ISO国コードと国名
+    // --- 国データ（必要に応じて増やせます） ---
     const countries = [
       { code: "jp", name: "日本" },
       { code: "us", name: "アメリカ合衆国" },
@@ -47,30 +88,79 @@
       { code: "au", name: "オーストラリア" }
     ];
 
+    let quizLength = 10;       // レベルで変動
+    let quizList = [];         // シャッフル後の問題
     let currentIndex = 0;
 
-    // 最初の問題を表示
-    function showQuestion(index) {
-      const country = countries[index];
-      document.getElementById("flag").src =
-        `https://flagcdn.com/128x96/${country.code}.png`;
-      document.getElementById("flag").alt = country.name;
-      document.getElementById("country-name").textContent = country.name;
-      document.getElementById("progress").textContent =
-        `${index + 1} / ${countries.length} 問目`;
+    // --- 配列シャッフル関数（Fisher-Yates） ---
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
     }
 
+    // --- レベル選択後にクイズ開始 ---
+    function startQuiz(level) {
+      // レベルごとに問題数を変更
+      quizLength = level === 1 ? 10 : level === 2 ? 20 : 30;
+
+      document.getElementById("quiz-title").textContent =
+        `レベル${level}（全${quizLength}問）`;
+
+      // 国データをシャッフルして先頭を利用
+      quizList = shuffle([...countries]).slice(0, quizLength);
+
+      currentIndex = 0;
+
+      // 画面切り替え
+      document.getElementById("title-screen").classList.add("hidden");
+      document.getElementById("result-screen").classList.add("hidden");
+      document.getElementById("quiz-screen").classList.remove("hidden");
+
+      showQuestion();
+    }
+
+    // --- 問題を表示 ---
+    function showQuestion() {
+      const country = quizList[currentIndex];
+
+      document.getElementById("flag").src =
+        `https://flagcdn.com/256x192/${country.code}.png`;
+
+      document.getElementById("country-name").textContent = country.name;
+
+      document.getElementById("progress").textContent =
+        `${currentIndex + 1} / ${quizLength} 問目`;
+    }
+
+    // --- 次へボタンクリック ---
     document.getElementById("next-btn").addEventListener("click", () => {
       currentIndex++;
-      if (currentIndex >= countries.length) {
-        alert("終了！おつかれさま!");
-        currentIndex = 0; // 最初に戻す（必要に応じて）
+
+      if (currentIndex >= quizLength) {
+        // クイズ終了
+        showResult();
+      } else {
+        showQuestion();
       }
-      showQuestion(currentIndex);
     });
 
-    // 初期起動
-    showQuestion(currentIndex);
+    // --- 結果表示 ---
+    function showResult() {
+      document.getElementById("quiz-screen").classList.add("hidden");
+      document.getElementById("result-screen").classList.remove("hidden");
+      document.getElementById("result-message").textContent =
+        `${quizLength}問クリアしました！`;
+    }
+
+    // --- タイトルへ戻る ---
+    function goTitle() {
+      document.getElementById("title-screen").classList.remove("hidden");
+      document.getElementById("quiz-screen").classList.add("hidden");
+      document.getElementById("result-screen").classList.add("hidden");
+    }
   </script>
 
 </body>
