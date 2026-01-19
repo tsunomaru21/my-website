@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>国旗クイズ</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    img {
+      max-width: 200px;
+      height: auto;
+      margin-top: 20px;
+    }
+    button {
+      margin-top: 20px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>国旗クイズ</h1>
+  <div id="quiz">
+    <div id="flag-container">
+      <img id="flag" src="" alt="">
+    </div>
+    <h2 id="country-name"></h2>
+    <button id="next-btn">次へ</button>
+    <p id="progress"></p>
+  </div>
+
+  <script>
+    // 出題する国データ（例）※ ISO国コードと国名
+    const countries = [
+      { code: "jp", name: "日本" },
+      { code: "us", name: "アメリカ合衆国" },
+      { code: "fr", name: "フランス" },
+      { code: "de", name: "ドイツ" },
+      { code: "in", name: "インド" },
+      { code: "br", name: "ブラジル" },
+      { code: "cn", name: "中国" },
+      { code: "ru", name: "ロシア" },
+      { code: "za", name: "南アフリカ" },
+      { code: "au", name: "オーストラリア" }
+    ];
+
+    let currentIndex = 0;
+
+    // 最初の問題を表示
+    function showQuestion(index) {
+      const country = countries[index];
+      document.getElementById("flag").src =
+        `https://flagcdn.com/128x96/${country.code}.png`;
+      document.getElementById("flag").alt = country.name;
+      document.getElementById("country-name").textContent = country.name;
+      document.getElementById("progress").textContent =
+        `${index + 1} / ${countries.length} 問目`;
+    }
+
+    document.getElementById("next-btn").addEventListener("click", () => {
+      currentIndex++;
+      if (currentIndex >= countries.length) {
+        alert("終了！おつかれさま!");
+        currentIndex = 0; // 最初に戻す（必要に応じて）
+      }
+      showQuestion(currentIndex);
+    });
+
+    // 初期起動
+    showQuestion(currentIndex);
+  </script>
+
+</body>
+</html>
