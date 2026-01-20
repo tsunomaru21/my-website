@@ -1,222 +1,210 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>国旗クイズ</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>国旗クイズ</title>
+<style>
     body {
-      font-family: sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        background: #f7f7f7;
     }
-
-    /* --- 画像のレスポンシブ --- */
+    #container {
+        width: 100%;
+        max-width: 800px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    h1, h2 {
+        margin-top: 0;
+    }
     img {
-      width: 90%;
-      max-width: 180px; /* PCで大きくなりすぎない */
-      height: auto;
-      margin-top: 20px;
+        width: 100%;
+        max-width: 450px;
+        height: auto;
+        border: 1px solid #ccc;
+        margin: 20px 0;
     }
-
-    /* --- ボタン --- */
     button {
-      padding: 12px;
-      font-size: 1.1rem;
-      margin: 10px auto;
-      width: 90%;
-      max-width: 320px;
-      border-radius: 10px;
-      border: none;
-      background-color: #007bff;
-      color: #fff;
-      display: block;
+        display: block;
+        width: 90%;
+        max-width: 320px;
+        margin: 12px auto;
+        padding: 16px;
+        font-size: 1.2rem;
+        border-radius: 10px;
+        border: none;
+        background: #007BFF;
+        color: white;
     }
-
-    button:hover {
-      background-color: #0056b3;
+    #timer {
+        font-size: 1.4rem;
+        margin-top: 10px;
+        font-weight: bold;
     }
-
-    /* --- スマホで文字が小さい対策 --- */
-    h1 {
-      font-size: 1.8rem;
-    }
-
-    h2 {
-      font-size: 1.4rem;
-    }
-
-    p {
-      font-size: 1.2rem;
-    }
-
-    @media (min-width: 768px) {
-      /* タブレット〜PCでは少し小さく */
-      h1 { font-size: 1.6rem; }
-      h2 { font-size: 1.2rem; }
-      p { font-size: 1rem; }
-      button { font-size: 1rem; }
-      img { max-width: 200px; }
-    }
-
-    /* 画面切り替え */
-    .hidden {
-      display: none;
-    }
-  </style>
+</style>
 </head>
-
 <body>
 
-  <!-- ▼ タイトル画面 -->
-  <div id="title-screen">
-    <h1>国旗クイズ</h1>
-    <p>レベルを選んでスタート！</p>
+<div id="container">
 
-    <button onclick="startQuiz(1)">レベル1（10問）</button>
-    <button onclick="startQuiz(2)">レベル2（10問）</button>
-    <button onclick="startQuiz(3)">レベル3（10問）</button>
-  </div>
+    <!-- タイトル画面 -->
+    <div id="titleScreen">
+        <h1>国旗クイズ</h1>
+        <h2>レベルを選んでください</h2>
 
-  <!-- ▼ クイズ画面 -->
-  <div id="quiz-screen" class="hidden">
-    <h1 id="quiz-title"></h1>
-    <img id="flag" src="" alt="flag" />
-    <h2 id="country-name"></h2>
-    <button id="next-btn">次へ</button>
-    <p id="progress"></p>
-  </div>
+        <button onclick="startLevel(1)">レベル1（10問）</button>
+        <button onclick="startLevel(2)">レベル2（10問）</button>
+        <button onclick="startLevel(3)">レベル3（10問）</button>
+        <button onclick="startLevel(4)">レベル4（10問）</button>
+        <button onclick="startLevel(5)">レベル5（10問）</button>
+        <button onclick="startLevel(6)">レベル6（10問）</button>
+    </div>
 
-  <!-- ▼ 結果画面 -->
-  <div id="result-screen" class="hidden">
-    <h1>おつかれさま！</h1>
-    <p id="result-message"></p>
-    <button onclick="goTitle()">タイトルに戻る</button>
-  </div>
+    <!-- クイズ画面 -->
+    <div id="quizScreen" style="display:none;">
+        <h2 id="questionNum"></h2>
+        <img id="flagImage" src="">
+        <h2 id="countryName"></h2>
+        <button onclick="nextQuestion()">次へ</button>
+        <div id="timer">タイム: 0秒</div>
+    </div>
 
-  <script>
-    /* --- レベルごとの国セット --- */
+    <!-- 結果画面 -->
+    <div id="resultScreen" style="display:none;">
+        <h2>終了！</h2>
+        <p id="resultTime"></p>
+        <button onclick="goTitle()">タイトルに戻る</button>
+    </div>
 
-    // レベル1：やさしい
-    const level1 = [
-      { code: "jp", name: "日本" },
-      { code: "us", name: "アメリカ" },
-      { code: "fr", name: "フランス" },
-      { code: "de", name: "ドイツ" },
-      { code: "br", name: "ブラジル" },
-      { code: "cn", name: "中国" },
-      { code: "in", name: "インド" },
-      { code: "gb", name: "イギリス" },
-      { code: "au", name: "オーストラリア" },
-      { code: "it", name: "イタリア" }
-    ];
+</div>
 
-    // レベル2：中級
-    const level2 = [
-      { code: "ca", name: "カナダ" },
-      { code: "es", name: "スペイン" },
-      { code: "kr", name: "韓国" },
-      { code: "mx", name: "メキシコ" },
-      { code: "ar", name: "アルゼンチン" },
-      { code: "za", name: "南アフリカ" },
-      { code: "se", name: "スウェーデン" },
-      { code: "ch", name: "スイス" },
-      { code: "id", name: "インドネシア" },
-      { code: "sa", name: "サウジアラビア" }
-    ];
 
-    // レベル3：少しむずかしい
-    const level3 = [
-      { code: "eg", name: "エジプト" },
-      { code: "ng", name: "ナイジェリア" },
-      { code: "pk", name: "パキスタン" },
-      { code: "ke", name: "ケニア" },
-      { code: "th", name: "タイ" },
-      { code: "ph", name: "フィリピン" },
-      { code: "pl", name: "ポーランド" },
-      { code: "vn", name: "ベトナム" },
-      { code: "tr", name: "トルコ" },
-      { code: "my", name: "マレーシア" }
-    ];
+<script>
+// ===== 国データ（レベル別に分割） =====
 
-    /* --- 変数 --- */
-    let quizList = [];
-    let currentIndex = 0;
-    const quizLength = 10; // 各レベル共通で10問
+const levelData = {
+    1: [
+        ["日本", "jp"], ["アメリカ", "us"], ["カナダ", "ca"],
+        ["フランス", "fr"], ["ドイツ", "de"], ["イタリア", "it"],
+        ["中国", "cn"], ["韓国", "kr"], ["イギリス", "gb"], ["オーストラリア", "au"]
+    ],
+    2: [
+        ["インド", "in"], ["ブラジル", "br"], ["ロシア", "ru"],
+        ["メキシコ", "mx"], ["スペイン", "es"], ["トルコ", "tr"],
+        ["サウジアラビア", "sa"], ["スウェーデン", "se"], ["インドネシア", "id"], ["アルゼンチン", "ar"]
+    ],
+    3: [
+        ["ノルウェー", "no"], ["フィンランド", "fi"], ["デンマーク", "dk"],
+        ["ポーランド", "pl"], ["ウクライナ", "ua"], ["オランダ", "nl"],
+        ["ベルギー", "be"], ["スイス", "ch"], ["オーストリア", "at"], ["チェコ", "cz"]
+    ],
+    4: [
+        ["タイ", "th"], ["マレーシア", "my"], ["ベトナム", "vn"],
+        ["フィリピン", "ph"], ["シンガポール", "sg"], ["ニュージーランド", "nz"],
+        ["南アフリカ", "za"], ["エジプト", "eg"], ["ケニア", "ke"], ["モロッコ", "ma"]
+    ],
+    5: [
+        ["ギリシャ", "gr"], ["ポルトガル", "pt"], ["アイルランド", "ie"],
+        ["ハンガリー", "hu"], ["クロアチア", "hr"], ["ルーマニア", "ro"],
+        ["ブルガリア", "bg"], ["セルビア", "rs"], ["スロバキア", "sk"], ["リトアニア", "lt"]
+    ],
+    6: [
+        ["チリ", "cl"], ["コロンビア", "co"], ["ペルー", "pe"],
+        ["ベネズエラ", "ve"], ["パキスタン", "pk"], ["バングラデシュ", "bd"],
+        ["カタール", "qa"], ["アラブ首長国連邦", "ae"], ["イスラエル", "il"], ["ヨルダン", "jo"]
+    ]
+};
 
-    /* --- シャッフル関数 --- */
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
+// ===== グローバル変数 =====
+let currentQuestions = [];
+let index = 0;
+let startTime = 0;
+let timerInterval;
 
-    /* --- クイズ開始 --- */
-    function startQuiz(level) {
-      quizList =
-        level === 1 ? shuffle([...level1]) :
-        level === 2 ? shuffle([...level2]) :
-                      shuffle([...level3]);
+// ===== タイトルに戻る =====
+function goTitle() {
+    document.getElementById("titleScreen").style.display = "block";
+    document.getElementById("quizScreen").style.display = "none";
+    document.getElementById("resultScreen").style.display = "none";
+}
 
-      quizList = quizList.slice(0, quizLength);
-      currentIndex = 0;
+// ===== レベル開始 =====
+function startLevel(level) {
 
-      // タイトル切り替え
-      document.getElementById("quiz-title").textContent =
-        `レベル${level}（全10問）`;
+    // データコピーしてシャッフル
+    currentQuestions = [...levelData[level]]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 10);
 
-      document.getElementById("title-screen").classList.add("hidden");
-      document.getElementById("result-screen").classList.add("hidden");
-      document.getElementById("quiz-screen").classList.remove("hidden");
+    index = 0;
 
-      showQuestion();
-    }
+    // 画面切り替え
+    document.getElementById("titleScreen").style.display = "none";
+    document.getElementById("quizScreen").style.display = "block";
+    document.getElementById("resultScreen").style.display = "none";
 
-    /* --- 問題表示 --- */
-    function showQuestion() {
-      const c = quizList[currentIndex];
+    // タイマー開始
+    startTimer();
 
-      document.getElementById("flag").src =
-        `https://flagcdn.com/256x192/${c.code}.png`;
+    showQuestion();
+}
 
-      document.getElementById("country-name").textContent = c.name;
+// ===== タイマー開始 =====
+function startTimer() {
+    startTime = Date.now();
+    clearInterval(timerInterval);
 
-      document.getElementById("progress").textContent =
-        `${currentIndex + 1} / ${quizLength} 問目`;
-    }
+    timerInterval = setInterval(() => {
+        const now = Date.now();
+        const sec = Math.floor((now - startTime) / 1000);
+        document.getElementById("timer").textContent = `タイム: ${sec}秒`;
+    }, 200);
+}
 
-    /* --- 次へボタン --- */
-    document.getElementById("next-btn").addEventListener("click", () => {
-      currentIndex++;
+// ===== タイマー停止 =====
+function stopTimer() {
+    clearInterval(timerInterval);
+    const totalSec = Math.floor((Date.now() - startTime) / 1000);
+    return totalSec;
+}
 
-      if (currentIndex >= quizLength) {
-        showResult();
-      } else {
+// ===== 問題表示 =====
+function showQuestion() {
+    const q = currentQuestions[index];
+    document.getElementById("questionNum").textContent = `第 ${index + 1} 問`;
+    document.getElementById("countryName").textContent = q[0];
+    document.getElementById("flagImage").src = `https://flagcdn.com/h240/${q[1]}.png`;
+}
+
+// ===== 次へ =====
+function nextQuestion() {
+    index++;
+
+    if (index >= 10) {
+        finishQuiz();
+    } else {
         showQuestion();
-      }
-    });
-
-    /* --- 結果 --- */
-    function showResult() {
-      document.getElementById("quiz-screen").classList.add("hidden");
-      document.getElementById("result-screen").classList.remove("hidden");
-
-      document.getElementById("result-message").textContent =
-        `全部で ${quizLength} 問、クリアしました！`;
     }
+}
 
-    /* --- タイトルへ --- */
-    function goTitle() {
-      document.getElementById("title-screen").classList.remove("hidden");
-      document.getElementById("quiz-screen").classList.add("hidden");
-      document.getElementById("result-screen").classList.add("hidden");
-    }
-  </script>
+// ===== 結果 =====
+function finishQuiz() {
+    const sec = stopTimer();
+
+    document.getElementById("quizScreen").style.display = "none";
+    document.getElementById("resultScreen").style.display = "block";
+    document.getElementById("resultTime").textContent = `タイム：${sec} 秒`;
+}
+
+</script>
 
 </body>
 </html>
