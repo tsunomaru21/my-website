@@ -1,136 +1,210 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>せかいのこっきクイズ</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>国旗クイズ</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        background: #f7f7f7;
+    }
+    #container {
+        width: 100%;
+        max-width: 800px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    h1, h2 {
+        margin-top: 0;
+    }
+    img {
+        width: 100%;
+        max-width: 450px;
+        height: auto;
+        border: 1px solid #ccc;
+        margin: 20px 0;
+    }
+    button {
+        display: block;
+        width: 90%;
+        max-width: 320px;
+        margin: 12px auto;
+        padding: 16px;
+        font-size: 1.2rem;
+        border-radius: 10px;
+        border: none;
+        background: #007BFF;
+        color: white;
+    }
+    #timer {
+        font-size: 1.4rem;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+</style>
 </head>
-
 <body>
-  <div id="title-screen" class="screen active">
-    <h1>せかいのこっきクイズ</h1>
-    <p>レベルをえらんでね</p>
 
-    <div class="level-buttons">
-      <button onclick="startLevel('level1')">レベル1</button>
-      <button onclick="startLevel('level2')">レベル2</button>
-      <button onclick="startLevel('level3')">レベル3</button>
-      <button onclick="startLevel('level4')">レベル4</button>
-      <button onclick="startLevel('level5')">レベル5</button>
-      <button onclick="startLevel('level6')">レベル6</button>
-    </div>
-  </div>
+<div id="container">
 
-  <div id="quiz-screen" class="screen">
-    <div class="timer">タイマー：<span id="timer">0.0</span>秒</div>
+    <!-- タイトル画面 -->
+    <div id="titleScreen">
+        <h1>国旗クイズ</h1>
+        <h2>レベルを選んでください</h2>
 
-    <h2 id="country-name"></h2>
-    <img id="flag-img" alt="flag">
-
-    <div class="hints">
-      <button onclick="showHint1()">ヒント１</button>
-      <div id="hint1" class="hint-text"></div>
-
-      <button onclick="showHint2()">ヒント２</button>
-      <div id="hint2" class="hint-text"></div>
+        <button onclick="startLevel(1)">レベル1（10問）</button>
+        <button onclick="startLevel(2)">レベル2（10問）</button>
+        <button onclick="startLevel(3)">レベル3（10問）</button>
+        <button onclick="startLevel(4)">レベル4（10問）</button>
+        <button onclick="startLevel(5)">レベル5（10問）</button>
+        <button onclick="startLevel(6)">レベル6（10問）</button>
     </div>
 
-    <button id="next-btn" onclick="nextQuestion()">つぎへ</button>
-  </div>
+    <!-- クイズ画面 -->
+    <div id="quizScreen" style="display:none;">
+        <h2 id="questionNum"></h2>
+        <img id="flagImage" src="">
+        <h2 id="countryName"></h2>
+        <button onclick="nextQuestion()">次へ</button>
+        <div id="timer">タイム: 0秒</div>
+    </div>
 
-  <div id="result-screen" class="screen">
-    <h2>おわり！</h2>
-    <p>タイム：<span id="final-time"></span>秒</p>
+    <!-- 結果画面 -->
+    <div id="resultScreen" style="display:none;">
+        <h2>終了！</h2>
+        <p id="resultTime"></p>
+        <button onclick="goTitle()">タイトルに戻る</button>
+    </div>
 
-    <h3>こたえ</h3>
-    <div id="answer-text"></div>
+</div>
 
-    <button onclick="goHome()">タイトルへ</button>
-  </div>
 
-  <script src="data.js"></script>
-  <script>
-    let currentLevel = [];
-    let index = 0;
-    let timer = 0;
-    let timerInterval;
+<script>
+// ===== 国データ（レベル別に分割） =====
 
-    function startLevel(levelKey) {
-      currentLevel = [...levels[levelKey]];
-      shuffle(currentLevel);
+const levelData = {
+    1: [
+        ["日本", "jp"], ["アメリカ", "us"], ["カナダ", "ca"],
+        ["フランス", "fr"], ["ドイツ", "de"], ["イタリア", "it"],
+        ["中国", "cn"], ["韓国", "kr"], ["イギリス", "gb"], ["オーストラリア", "au"]
+    ],
+    2: [
+        ["インド", "in"], ["ブラジル", "br"], ["ロシア", "ru"],
+        ["メキシコ", "mx"], ["スペイン", "es"], ["トルコ", "tr"],
+        ["サウジアラビア", "sa"], ["スウェーデン", "se"], ["インドネシア", "id"], ["アルゼンチン", "ar"]
+    ],
+    3: [
+        ["ノルウェー", "no"], ["フィンランド", "fi"], ["デンマーク", "dk"],
+        ["ポーランド", "pl"], ["ウクライナ", "ua"], ["オランダ", "nl"],
+        ["ベルギー", "be"], ["スイス", "ch"], ["オーストリア", "at"], ["チェコ", "cz"]
+    ],
+    4: [
+        ["タイ", "th"], ["マレーシア", "my"], ["ベトナム", "vn"],
+        ["フィリピン", "ph"], ["シンガポール", "sg"], ["ニュージーランド", "nz"],
+        ["南アフリカ", "za"], ["エジプト", "eg"], ["ケニア", "ke"], ["モロッコ", "ma"]
+    ],
+    5: [
+        ["ギリシャ", "gr"], ["ポルトガル", "pt"], ["アイルランド", "ie"],
+        ["ハンガリー", "hu"], ["クロアチア", "hr"], ["ルーマニア", "ro"],
+        ["ブルガリア", "bg"], ["セルビア", "rs"], ["スロバキア", "sk"], ["リトアニア", "lt"]
+    ],
+    6: [
+        ["チリ", "cl"], ["コロンビア", "co"], ["ペルー", "pe"],
+        ["ベネズエラ", "ve"], ["パキスタン", "pk"], ["バングラデシュ", "bd"],
+        ["カタール", "qa"], ["アラブ首長国連邦", "ae"], ["イスラエル", "il"], ["ヨルダン", "jo"]
+    ]
+};
 
-      index = 0;
-      timer = 0;
+// ===== グローバル変数 =====
+let currentQuestions = [];
+let index = 0;
+let startTime = 0;
+let timerInterval;
 
-      document.getElementById("title-screen").classList.remove("active");
-      document.getElementById("quiz-screen").classList.add("active");
+// ===== タイトルに戻る =====
+function goTitle() {
+    document.getElementById("titleScreen").style.display = "block";
+    document.getElementById("quizScreen").style.display = "none";
+    document.getElementById("resultScreen").style.display = "none";
+}
 
-      startTimer();
-      loadQuestion();
-    }
+// ===== レベル開始 =====
+function startLevel(level) {
 
-    function startTimer() {
-      timerInterval = setInterval(() => {
-        timer += 0.1;
-        document.getElementById("timer").textContent = timer.toFixed(1);
-      }, 100);
-    }
+    // データコピーしてシャッフル
+    currentQuestions = [...levelData[level]]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 10);
 
-    function stopTimer() {
-      clearInterval(timerInterval);
-    }
+    index = 0;
 
-    function loadQuestion() {
-      const q = currentLevel[index];
-      document.getElementById("country-name").textContent = q.country;
-      document.getElementById("flag-img").src = q.flag;
+    // 画面切り替え
+    document.getElementById("titleScreen").style.display = "none";
+    document.getElementById("quizScreen").style.display = "block";
+    document.getElementById("resultScreen").style.display = "none";
 
-      document.getElementById("hint1").textContent = "";
-      document.getElementById("hint2").textContent = "";
-    }
+    // タイマー開始
+    startTimer();
 
-    function showHint1() {
-      document.getElementById("hint1").textContent = currentLevel[index].hint1;
-    }
+    showQuestion();
+}
 
-    function showHint2() {
-      document.getElementById("hint2").textContent = currentLevel[index].hint2;
-    }
+// ===== タイマー開始 =====
+function startTimer() {
+    startTime = Date.now();
+    clearInterval(timerInterval);
 
-    function nextQuestion() {
-      index++;
-      if (index >= currentLevel.length) {
+    timerInterval = setInterval(() => {
+        const now = Date.now();
+        const sec = Math.floor((now - startTime) / 1000);
+        document.getElementById("timer").textContent = `タイム: ${sec}秒`;
+    }, 200);
+}
+
+// ===== タイマー停止 =====
+function stopTimer() {
+    clearInterval(timerInterval);
+    const totalSec = Math.floor((Date.now() - startTime) / 1000);
+    return totalSec;
+}
+
+// ===== 問題表示 =====
+function showQuestion() {
+    const q = currentQuestions[index];
+    document.getElementById("questionNum").textContent = `第 ${index + 1} 問`;
+    document.getElementById("countryName").textContent = q[0];
+    document.getElementById("flagImage").src = `https://flagcdn.com/h240/${q[1]}.png`;
+}
+
+// ===== 次へ =====
+function nextQuestion() {
+    index++;
+
+    if (index >= 10) {
         finishQuiz();
-      } else {
-        loadQuestion();
-      }
+    } else {
+        showQuestion();
     }
+}
 
-    function finishQuiz() {
-      stopTimer();
+// ===== 結果 =====
+function finishQuiz() {
+    const sec = stopTimer();
 
-      const lastAnswer = currentLevel[currentLevel.length - 1].answer;
+    document.getElementById("quizScreen").style.display = "none";
+    document.getElementById("resultScreen").style.display = "block";
+    document.getElementById("resultTime").textContent = `タイム：${sec} 秒`;
+}
 
-      document.getElementById("quiz-screen").classList.remove("active");
-      document.getElementById("result-screen").classList.add("active");
+</script>
 
-      document.getElementById("final-time").textContent = timer.toFixed(1);
-      document.getElementById("answer-text").textContent = lastAnswer;
-    }
-
-    function goHome() {
-      document.getElementById("result-screen").classList.remove("active");
-      document.getElementById("title-screen").classList.add("active");
-    }
-
-    // Fisher–Yates シャッフル
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-    }
-  </script>
 </body>
 </html>
