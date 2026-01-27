@@ -1,66 +1,38 @@
-// =======================================
-// 画面要素
-// =======================================
-const titleScreen = document.getElementById("title-screen");
-const levelScreen = document.getElementById("level-screen");
-const quizScreen = document.getElementById("quiz-screen");
+let quizType=null;
+let level=1;
+let questions=[];
+let index=0;
+let timer=null;
+let sec=0;
 
-const countryName = document.getElementById("country-name");
-const flagOptions = document.getElementById("flag-options");
-const resultMark = document.getElementById("result-mark");
-const timerDisplay = document.getElementById("timer");
-const currentLevelLabel = document.getElementById("current-level");
+const titleScreen=document.getElementById("title-screen");
+const levelScreen=document.getElementById("level-screen");
+const quizScreen=document.getElementById("quiz-screen");
 
-// =======================================
-// 変数
-// =======================================
-let currentQuizType = null;      // "location" or "flag"
-let level = 1;
-let questions = [];
-let questionIndex = 0;
-
-let timer = null;
-let timeSec = 0;
-
-const correctSound = new Audio("correct.wav");
-const wrongSound = new Audio("wrong.wav");
-
-// =======================================
-// 画面遷移
-// =======================================
-function selectQuiz(type) {
-    currentQuizType = type;
-
-    // タイトルを消してレベル選択へ
+function selectQuiz(type){
+    quizType=type;
     titleScreen.classList.add("hidden");
     levelScreen.classList.remove("hidden");
 }
 
-function backToTitle() {
+function backToTitle(){
     levelScreen.classList.add("hidden");
     quizScreen.classList.add("hidden");
     titleScreen.classList.remove("hidden");
 }
 
-function returnToLevel() {
+function returnToLevel(){
     quizScreen.classList.add("hidden");
     levelScreen.classList.remove("hidden");
 }
 
-// =======================================
-// ゲーム開始
-// =======================================
-function startGame(selectedLevel) {
-    level = selectedLevel;
-    questionIndex = 0;
-    timeSec = 0;
+function startGame(lv){
+    level=lv;
+    index=0;
+    sec=0;
 
-    currentLevelLabel.textContent = "レベル " + level;
+    questions = quizData["level"+level];
 
-    // レベルに応じたデータを取得
-    questions = quizData["level" + level];
-
-    // 画面遷移
     levelScreen.classList.add("hidden");
     quizScreen.classList.remove("hidden");
 
@@ -68,102 +40,58 @@ function startGame(selectedLevel) {
     showQuestion();
 }
 
-// =======================================
-// タイマー
-// =======================================
-function startTimer() {
-    if (timer) clearInterval(timer);
-
-    timer = setInterval(() => {
-        timeSec++;
-        const m = String(Math.floor(timeSec / 60)).padStart(2, "0");
-        const s = String(timeSec % 60).padStart(2, "0");
-        timerDisplay.textContent = `${m}:${s}`;
-    }, 1000);
+function startTimer(){
+    clearInterval(timer);
+    timer=setInterval(()=>{
+        sec++;
+        document.getElementById("timer").textContent=sec+"秒";
+    },1000);
 }
 
-function stopTimer() {
-    if (timer) clearInterval(timer);
-    timer = null;
+function showQuestion(){
+    const q=questions[index];
+    document.getElementById("country-name").textContent=q.name;
+
+    const options=document.getElementById("flag-options");
+    options.innerHTML="";
+    options.classList.remove("hidden");
+
+    const flags=[q.code,...q.wrong];
+    shuffle(flags);
+
+    flags.forEach(code=>{
+        const img=document.createElement("img");
+        img.src="https://flagcdn.com/h120/"+code+".png";
+        img.className="flag-choice";
+        img.onclick=()=>answer(code,q.code);
+        options.appendChild(img);
+    });
+
+    document.getElementById("result-mark").textContent="";
 }
 
-// =======================================
-// 問題表示
-// =======================================
-function showQuestion() {
-    const q = questions[questionIndex];
+function answer(chosen,correct){
+    const mark=document.getElementById("result-mark");
 
-    resultMark.textContent = "";
-    countryName.textContent = q.name;
-
-    // 「場所をさがす」は国名だけ出す
-    if (currentQuizType === "location") {
-        flagOptions.classList.add("hidden");
-        return;
-    }
-
-    // 「国旗３択クイズ」
-    createFlagChoices(q);
-}
-
-// =======================================
-// 国旗３択生成
-// =======================================
-function createFlagChoices(q) {
-    flagOptions.innerHTML = "";
-    flagOptions.classList.remove("hidden");
-
-    let choices = shuffle([q.correctFlag, q.wrongFlag1, q.wrongFlag2]);
-
-    for (let imgSrc of choices) {
-        let img = document.createElement("img");
-        img.src = imgSrc;
-        img.className = "flag-option";
-
-        img.onclick = () => checkFlagAnswer(imgSrc, q.correctFlag);
-        flagOptions.appendChild(img);
+    if(chosen===correct){
+        mark.textContent="⭕";
+        new Audio("correct.wav").play();
+        index++;
+        if(index>=questions.length){
+            clearInterval(timer);
+            mark.textContent="クリア！ "+sec+"秒";
+        }else{
+            setTimeout(showQuestion,800);
+        }
+    }else{
+        mark.textContent="❌";
+        new Audio("wrong.wav").play();
     }
 }
 
-// =======================================
-// 正誤判定
-// =======================================
-function checkFlagAnswer(selected, correct) {
-    if (selected === correct) {
-        resultMark.textContent = "〇";
-        resultMark.className = "correct";
-        correctSound.play();
-
-        setTimeout(() => {
-            nextQuestion();
-        }, 700);
-    } else {
-        resultMark.textContent = "×";
-        resultMark.className = "wrong";
-        wrongSound.play();
+function shuffle(a){
+    for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
     }
-}
-
-// =======================================
-// 次の問題
-// =======================================
-function nextQuestion() {
-    questionIndex++;
-
-    if (questionIndex >= questions.length) {
-        // 終了
-        stopTimer();
-        countryName.textContent = "おわり！";
-        flagOptions.classList.add("hidden");
-        return;
-    }
-
-    showQuestion();
-}
-
-// =======================================
-// シャッフル関数
-// =======================================
-function shuffle(arr) {
-    return arr.sort(() => Math.random() - 0.5);
 }

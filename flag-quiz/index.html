@@ -1,67 +1,57 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>世界クイズ</title>
-    <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>国旗クイズ ver1.1</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
+<div id="title-screen">
+    <h1>国旗クイズ <span class="ver">ver1.1</span></h1>
+    <p>クイズの種類を選んでください</p>
 
-    <!-- タイトル画面 -->
-    <div id="title-screen">
-        <h1>世界クイズ</h1>
-        <h2>クイズを選んでください</h2>
+    <button class="menu-btn" onclick="selectQuiz('location')">
+        国名 → 場所をさがす
+    </button>
 
-        <button class="menu-btn" onclick="selectQuiz('location')">
-            国名 → 場所をさがす
-        </button>
-        <button class="menu-btn" onclick="selectQuiz('flag')">
-            国名 → 国旗３択クイズ
-        </button>
+    <button class="menu-btn" onclick="selectQuiz('flag')">
+        国名 → 国旗３択クイズ
+    </button>
+</div>
+
+<div id="level-screen" class="hidden">
+    <h2>レベルを選んでください</h2>
+    <div id="level-buttons">
+        <button onclick="startGame(1)">レベル1</button>
+        <button onclick="startGame(2)">レベル2</button>
+        <button onclick="startGame(3)">レベル3</button>
+        <button onclick="startGame(4)">レベル4</button>
+        <button onclick="startGame(5)">レベル5</button>
+        <button onclick="startGame(6)">レベル6</button>
     </div>
 
-    <!-- レベル選択画面 -->
-    <div id="level-screen" class="hidden">
-        <h2>レベルを選んでください</h2>
+    <button class="back-btn" onclick="backToTitle()">タイトルへ戻る</button>
+</div>
 
-        <div class="level-buttons">
-            <button onclick="startGame(1)">レベル1</button>
-            <button onclick="startGame(2)">レベル2</button>
-            <button onclick="startGame(3)">レベル3</button>
-            <button onclick="startGame(4)">レベル4</button>
-            <button onclick="startGame(5)">レベル5</button>
-            <button onclick="startGame(6)">レベル6</button>
-        </div>
-
-        <button class="back-btn" onclick="backToTitle()">← タイトルへ</button>
+<div id="quiz-screen" class="hidden">
+    <div id="header">
+        <span id="current-level"></span>
+        <span id="timer">00:00</span>
     </div>
 
-    <!-- クイズ画面 -->
-    <div id="quiz-screen" class="hidden">
-        <div id="quiz-header">
-            <div id="current-level"></div>
-            <div id="timer">00:00</div>
-        </div>
+    <h2 id="country-name">国名</h2>
 
-        <div id="question-box">
-            <p id="country-name"></p>
-        </div>
+    <div id="flag-options" class="hidden"></div>
 
-        <!-- 国旗３択 -->
-        <div id="flag-options" class="flag-row hidden"></div>
+    <div id="result-mark"></div>
 
-        <!-- 正解 / 不正解 -->
-        <div id="result-mark"></div>
-
-        <button class="back-btn" onclick="returnToLevel()">← レベル選択へ</button>
-    </div>
-
+    <button class="back-btn" onclick="returnToLevel()">レベル選択に戻る</button>
 </div>
 
 <script src="data.js"></script>
 <script src="game.js"></script>
+
 </body>
 </html>

@@ -1,89 +1,72 @@
-// data.js
-
-// ============
-// レベル1（実データ10問入り）
-// ============
-const levels = {
-    level1: [
-      {
-        country: "Japan",
-        flag: "https://flagcdn.com/w320/jp.png",
-        hint1: "アジアのしまのくに",
-        hint2: "さくらやすしがゆうめい",
-        answer: "アジアのひがしがわにあるよ"
-      },
-      {
-        country: "United States",
-        flag: "https://flagcdn.com/w320/us.png",
-        hint1: "きたアメリカにあるおおきなくに",
-        hint2: "ハンバーガーがにんき",
-        answer: "きたアメリカのまんなかあたりだよ"
-      },
-      {
-        country: "South Korea",
-        flag: "https://flagcdn.com/w320/kr.png",
-        hint1: "アジアのとなりのくに",
-        hint2: "K-POPがゆうめい",
-        answer: "にほんのにしがわにあるよ"
-      },
-      {
-        country: "China",
-        flag: "https://flagcdn.com/w320/cn.png",
-        hint1: "アジアのとてもおおきなくに",
-        hint2: "ぎょうざやパンダがゆうめい",
-        answer: "にほんのたいりくがわだよ"
-      },
-      {
-        country: "France",
-        flag: "https://flagcdn.com/w320/fr.png",
-        hint1: "ヨーロッパのくに",
-        hint2: "エッフェルとうがあるよ",
-        answer: "ヨーロッパのにしがわあたりだよ"
-      },
-      {
-        country: "United Kingdom",
-        flag: "https://flagcdn.com/w320/gb.png",
-        hint1: "ヨーロッパのしまのくに",
-        hint2: "えいごのくに",
-        answer: "ヨーロッパのにしにあるしま"
-      },
-      {
-        country: "Germany",
-        flag: "https://flagcdn.com/w320/de.png",
-        hint1: "ヨーロッパのまんなかのくに",
-        hint2: "ソーセージがにんき",
-        answer: "フランスのとなりだよ"
-      },
-      {
-        country: "Italy",
-        flag: "https://flagcdn.com/w320/it.png",
-        hint1: "ヨーロッパのブーツみたいなくに",
-        hint2: "ピザとパスタ",
-        answer: "ヨーロッパのなんぶだよ"
-      },
-      {
-        country: "Australia",
-        flag: "https://flagcdn.com/w320/au.png",
-        hint1: "オセアニアのしまのくに",
-        hint2: "コアラやカンガルーがいるよ",
-        answer: "ちきゅうのしたのほう（みなみ）だよ"
-      },
-      {
-        country: "Brazil",
-        flag: "https://flagcdn.com/w320/br.png",
-        hint1: "みなみアメリカのくに",
-        hint2: "サッカーがとてもつよい",
-        answer: "みなみアメリカのひがしがわだよ"
-      }
-    ],
-  
-    // =============
-    // レベル2〜6（後でデータを充填）
-    // =============
-    level2: [],
-    level3: [],
-    level4: [],
-    level5: [],
-    level6: []
-  };
-  
+const levels = { level1: [
+  {country:"Japan",flag:"https://flagcdn.com/w320/japan.png",hint1:"アジア",hint2:"さくらやすし",answer:"アジアのひがしがわ"},
+  {country:"United States",flag:"https://flagcdn.com/w320/united-states.png",hint1:"きたアメリカ",hint2:"ハンバーガー",answer:"きたアメリカのまんなか"},
+  {country:"South Korea",flag:"https://flagcdn.com/w320/south-korea.png",hint1:"アジア",hint2:"K-POP",answer:"にほんのにし"},
+  {country:"China",flag:"https://flagcdn.com/w320/china.png",hint1:"アジア",hint2:"パンダ",answer:"にほんのたいりくがわ"},
+  {country:"France",flag:"https://flagcdn.com/w320/france.png",hint1:"ヨーロッパ",hint2:"エッフェルとう",answer:"ヨーロッパのにし"},
+  {country:"United Kingdom",flag:"https://flagcdn.com/w320/united-kingdom.png",hint1:"ヨーロッパ",hint2:"えいご",answer:"ヨーロッパのにしのしま"},
+  {country:"Germany",flag:"https://flagcdn.com/w320/germany.png",hint1:"ヨーロッパ",hint2:"ソーセージ",answer:"フランスのとなり"},
+  {country:"Italy",flag:"https://flagcdn.com/w320/italy.png",hint1:"ヨーロッパ",hint2:"ピザ",answer:"ヨーロッパのなんぶ"},
+  {country:"Australia",flag:"https://flagcdn.com/w320/australia.png",hint1:"オセアニア",hint2:"コアラ",answer:"みなみのほう"},
+  {country:"Brazil",flag:"https://flagcdn.com/w320/brazil.png",hint1:"みなみアメリカ",hint2:"サッカー",answer:"みなみアメリカのひがし"},
+],
+level2: [
+  {country:"Canada",flag:"https://flagcdn.com/w320/canada.png",hint1:"きたアメリカ",hint2:"メープルシロップ",answer:"きたアメリカのうえ"},
+  {country:"Mexico",flag:"https://flagcdn.com/w320/mexico.png",hint1:"きたアメリカ",hint2:"タコス",answer:"アメリカのした"},
+  {country:"Argentina",flag:"https://flagcdn.com/w320/argentina.png",hint1:"みなみアメリカ",hint2:"にくりょうり",answer:"みなみアメリカのなんぶ"},
+  {country:"Chile",flag:"https://flagcdn.com/w320/chile.png",hint1:"みなみアメリカ",hint2:"ながいくに",answer:"みなみアメリカのみぎがわ"},
+  {country:"Peru",flag:"https://flagcdn.com/w320/peru.png",hint1:"みなみアメリカ",hint2:"マチュピチュ",answer:"みなみアメリカのまんなか"},
+  {country:"Spain",flag:"https://flagcdn.com/w320/spain.png",hint1:"ヨーロッパ",hint2:"サッカー",answer:"フランスのした"},
+  {country:"Portugal",flag:"https://flagcdn.com/w320/portugal.png",hint1:"ヨーロッパ",hint2:"エッグタルト",answer:"スペインのとなり"},
+  {country:"Netherlands",flag:"https://flagcdn.com/w320/netherlands.png",hint1:"ヨーロッパ",hint2:"チューリップ",answer:"ドイツのにし"},
+  {country:"Belgium",flag:"https://flagcdn.com/w320/belgium.png",hint1:"ヨーロッパ",hint2:"チョコレート",answer:"フランスのとなり"},
+  {country:"Sweden",flag:"https://flagcdn.com/w320/sweden.png",hint1:"ヨーロッパ",hint2:"IKEA",answer:"ヨーロッパのきた"},
+],
+level3: [
+  {country:"Norway",flag:"https://flagcdn.com/w320/norway.png",hint1:"ヨーロッパ",hint2:"フィヨルド",answer:"スウェーデンのにし"},
+  {country:"Finland",flag:"https://flagcdn.com/w320/finland.png",hint1:"ヨーロッパ",hint2:"サウナ",answer:"ロシアのとなり"},
+  {country:"Poland",flag:"https://flagcdn.com/w320/poland.png",hint1:"ヨーロッパ",hint2:"ポーランドりょうり",answer:"ドイツのひがし"},
+  {country:"Czechia",flag:"https://flagcdn.com/w320/czechia.png",hint1:"ヨーロッパ",hint2:"ビール",answer:"ヨーロッパのまんなか"},
+  {country:"Austria",flag:"https://flagcdn.com/w320/austria.png",hint1:"ヨーロッパ",hint2:"おんがく",answer:"ドイツのみなみ"},
+  {country:"Switzerland",flag:"https://flagcdn.com/w320/switzerland.png",hint1:"ヨーロッパ",hint2:"チョコ",answer:"フランスのひがし"},
+  {country:"Greece",flag:"https://flagcdn.com/w320/greece.png",hint1:"ヨーロッパ",hint2:"ぎりしゃしんわ",answer:"ヨーロッパのなんぶ"},
+  {country:"Egypt",flag:"https://flagcdn.com/w320/egypt.png",hint1:"アフリカ",hint2:"ピラミッド",answer:"アフリカのうえ"},
+  {country:"South Africa",flag:"https://flagcdn.com/w320/south-africa.png",hint1:"アフリカ",hint2:"サファリ",answer:"アフリカのした"},
+  {country:"Nigeria",flag:"https://flagcdn.com/w320/nigeria.png",hint1:"アフリカ",hint2:"おんがく",answer:"アフリカのにし"},
+],
+level4: [
+  {country:"Kenya",flag:"https://flagcdn.com/w320/kenya.png",hint1:"アフリカ",hint2:"どうぶつ",answer:"アフリカのひがし"},
+  {country:"Morocco",flag:"https://flagcdn.com/w320/morocco.png",hint1:"アフリカ",hint2:"ミントティー",answer:"アフリカのうえのにし"},
+  {country:"Turkey",flag:"https://flagcdn.com/w320/turkey.png",hint1:"アジアとヨーロッパ",hint2:"ケバブ",answer:"ヨーロッパとアジアのさかいめ"},
+  {country:"Saudi Arabia",flag:"https://flagcdn.com/w320/saudi-arabia.png",hint1:"アジア",hint2:"さばく",answer:"アラビアはんとう"},
+  {country:"UAE",flag:"https://flagcdn.com/w320/uae.png",hint1:"アジア",hint2:"ドバイ",answer:"アラビアはんとうのひがし"},
+  {country:"India",flag:"https://flagcdn.com/w320/india.png",hint1:"アジア",hint2:"カレー",answer:"アジアのまんなかよりひがし"},
+  {country:"Pakistan",flag:"https://flagcdn.com/w320/pakistan.png",hint1:"アジア",hint2:"ちゃい",answer:"インドのとなり"},
+  {country:"Bangladesh",flag:"https://flagcdn.com/w320/bangladesh.png",hint1:"アジア",hint2:"さかなりょうり",answer:"インドのひがし"},
+  {country:"Thailand",flag:"https://flagcdn.com/w320/thailand.png",hint1:"アジア",hint2:"トムヤム",answer:"アジアのなんぶ"},
+  {country:"Vietnam",flag:"https://flagcdn.com/w320/vietnam.png",hint1:"アジア",hint2:"フォー",answer:"アジアのひがし"},
+],
+level5: [
+  {country:"Indonesia",flag:"https://flagcdn.com/w320/indonesia.png",hint1:"アジア",hint2:"バリとう",answer:"アジアのなんぶのしま"},
+  {country:"Philippines",flag:"https://flagcdn.com/w320/philippines.png",hint1:"アジア",hint2:"マンゴー",answer:"アジアのひがしのしま"},
+  {country:"Malaysia",flag:"https://flagcdn.com/w320/malaysia.png",hint1:"アジア",hint2:"ナシゴレン",answer:"アジアのなんぶ"},
+  {country:"Singapore",flag:"https://flagcdn.com/w320/singapore.png",hint1:"アジア",hint2:"マーライオン",answer:"マレーシアのした"},
+  {country:"New Zealand",flag:"https://flagcdn.com/w320/new-zealand.png",hint1:"オセアニア",hint2:"ひつじ",answer:"オーストラリアのひがしのしま"},
+  {country:"Fiji",flag:"https://flagcdn.com/w320/fiji.png",hint1:"オセアニア",hint2:"ビーチ",answer:"オーストラリアのひがし"},
+  {country:"Russia",flag:"https://flagcdn.com/w320/russia.png",hint1:"ユーラシア",hint2:"とてもおおきい",answer:"ユーラシアのきた"},
+  {country:"Ukraine",flag:"https://flagcdn.com/w320/ukraine.png",hint1:"ヨーロッパ",hint2:"こめ",answer:"ロシアのにし"},
+  {country:"Kazakhstan",flag:"https://flagcdn.com/w320/kazakhstan.png",hint1:"アジア",hint2:"ひろいくに",answer:"ロシアのした"},
+  {country:"Iran",flag:"https://flagcdn.com/w320/iran.png",hint1:"アジア",hint2:"バザール",answer:"アジアのにし"},
+],
+level6: [
+  {country:"Iraq",flag:"https://flagcdn.com/w320/iraq.png",hint1:"アジア",hint2:"さばく",answer:"アラビアはんとうのきた"},
+  {country:"Israel",flag:"https://flagcdn.com/w320/israel.png",hint1:"アジア",hint2:"ゆだいきょう",answer:"ちちゅうかいのひがし"},
+  {country:"Jordan",flag:"https://flagcdn.com/w320/jordan.png",hint1:"アジア",hint2:"ぺトラ",answer:"イスラエルのとなり"},
+  {country:"Qatar",flag:"https://flagcdn.com/w320/qatar.png",hint1:"アジア",hint2:"サッカーW杯",answer:"アラビアはんとう"},
+  {country:"Kuwait",flag:"https://flagcdn.com/w320/kuwait.png",hint1:"アジア",hint2:"おいる",answer:"イラクのした"},
+  {country:"Oman",flag:"https://flagcdn.com/w320/oman.png",hint1:"アジア",hint2:"さばく",answer:"アラビアはんとうのひがし"},
+  {country:"Nepal",flag:"https://flagcdn.com/w320/nepal.png",hint1:"アジア",hint2:"エベレスト",answer:"インドのきた"},
+  {country:"Bhutan",flag:"https://flagcdn.com/w320/bhutan.png",hint1:"アジア",hint2:"しあわせのくに",answer:"ネパールのひがし"},
+  {country:"Sri Lanka",flag:"https://flagcdn.com/w320/sri-lanka.png",hint1:"アジア",hint2:"カレー",answer:"インドのしたのしま"},
+],
+};
