@@ -1,292 +1,59 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>国旗クイズ</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        justify-content: center;
-        background: #f7f7f7;
-    }
-    #container {
-        width: 100%;
-        max-width: 800px;
-        background: #fff;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        text-align: center;
-    }
-    h1, h2 {
-        margin-top: 0;
-    }
-    img {
-        width: 100%;
-        max-width: 450px;
-        height: auto;
-        border: 1px solid #ccc;
-        margin: 20px 0;
-    }
-    button {
-        display: block;
-        width: 90%;
-        max-width: 320px;
-        margin: 12px auto;
-        padding: 16px;
-        font-size: 1.2rem;
-        border-radius: 10px;
-        border: none;
-        background: #007BFF;
-        color: white;
-        cursor: pointer;
-    }
-    .flag-option {
-        width: 90%;
-        max-width: 260px;
-        margin: 10px;
-        border: 2px solid #ccc;
-        border-radius: 10px;
-        cursor: pointer;
-    }
-    .flag-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 12px;
-        margin: 20px 0;
-    }
-    .feedback {
-        font-size: 2rem;
-        font-weight: bold;
-        height: 40px;
-        margin: 10px 0;
-    }
-    #timer {
-        font-size: 1.4rem;
-        margin-top: 10px;
-        font-weight: bold;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界クイズ</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="container">
+    <!-- タイトル画面 -->
+    <div id="title-screen" class="screen">
+        <h1>世界の国クイズ</h1>
+        <p>あそぶクイズをえらんでね</p>
 
-    <!-- ▼▼▼ タイトル画面（新） ▼▼▼ -->
-    <div id="titleScreen">
-        <h1>国旗クイズ</h1>
-
-        <h2>クイズの種類を選んでください</h2>
-        <button onclick="selectQuiz('basic')">A：国名を見て国を探す</button>
-        <button onclick="selectQuiz('flag')">B：国旗3択クイズ</button>
-
-        <hr style="margin: 30px 0;">
-
-        <h2>レベルを選んでください</h2>
-        <button onclick="startLevel(1)">レベル1（10問）</button>
-        <button onclick="startLevel(2)">レベル2（10問）</button>
-        <button onclick="startLevel(3)">レベル3（10問）</button>
-        <button onclick="startLevel(4)">レベル4（10問）</button>
-        <button onclick="startLevel(5)">レベル5（10問）</button>
-        <button onclick="startLevel(6)">レベル6（10問）</button>
+        <div class="menu">
+            <button class="menu-btn" onclick="selectMode('map')">国名 → 場所をさがす</button>
+            <button class="menu-btn" onclick="selectMode('flag')">国名 → 国旗3択クイズ</button>
+        </div>
     </div>
 
-    <!-- ▼▼▼ もとのクイズ画面（国名＋国旗表示） ▼▼▼ -->
-    <div id="quizScreenBasic" style="display:none;">
-        <h2 id="questionNumBasic"></h2>
-        <img id="flagImageBasic" src="">
-        <h2 id="countryNameBasic"></h2>
-        <button onclick="nextQuestionBasic()">次へ</button>
-        <div id="timerBasic">タイム: 0秒</div>
+    <!-- レベル選択画面 -->
+    <div id="level-screen" class="screen hidden">
+        <h2 id="level-title">レベルを選んでね</h2>
+        <div class="menu">
+            <button class="level-btn" onclick="startQuiz(1)">レベル1</button>
+            <button class="level-btn" onclick="startQuiz(2)">レベル2</button>
+            <button class="level-btn" onclick="startQuiz(3)">レベル3</button>
+            <button class="level-btn" onclick="startQuiz(4)">レベル4</button>
+            <button class="level-btn" onclick="startQuiz(5)">レベル5</button>
+            <button class="level-btn" onclick="startQuiz(6)">レベル6</button>
+        </div>
     </div>
 
-    <!-- ▼▼▼ 新しい3択国旗クイズ画面 ▼▼▼ -->
-    <div id="quizScreenFlag" style="display:none;">
-        <h2 id="questionNumFlag"></h2>
-        <h2 id="countryNameFlag"></h2>
+    <!-- クイズ画面 -->
+    <div id="quiz-screen" class="screen hidden">
+        <h2 id="question-title">Q1</h2>
+        <p id="country-name" class="country-name"></p>
 
-        <div class="flag-container" id="flagOptions"></div>
+        <!-- 国旗3択 -->
+        <div id="flag-options" class="flag-options hidden"></div>
 
-        <div class="feedback" id="feedback"></div>
+        <!-- 正解/不正解の表示 -->
+        <div id="result-mark" class="result-mark hidden"></div>
 
-        <div id="timerFlag">タイム: 0秒</div>
+        <button id="next-btn" class="next-btn hidden" onclick="nextQuestion()">つぎへ</button>
     </div>
 
-    <!-- ▼▼▼ 結果画面 ▼▼▼ -->
-    <div id="resultScreen" style="display:none;">
-        <h2>終了！</h2>
-        <p id="resultTime"></p>
-        <button onclick="goTitle()">タイトルに戻る</button>
+    <!-- 結果画面 -->
+    <div id="finish-screen" class="screen hidden">
+        <h2>おわり！</h2>
+        <p id="finish-time"></p>
+        <button class="menu-btn" onclick="goTitle()">タイトルへもどる</button>
     </div>
 
-</div>
-
-
-<script>
-// ===== 国データ =====
-const levelData = {
-    1: [["日本","jp"],["アメリカ","us"],["カナダ","ca"],["フランス","fr"],["ドイツ","de"],["イタリア","it"],["中国","cn"],["韓国","kr"],["イギリス","gb"],["オーストラリア","au"]],
-    2: [["インド","in"],["ブラジル","br"],["ロシア","ru"],["メキシコ","mx"],["スペイン","es"],["トルコ","tr"],["サウジアラビア","sa"],["スウェーデン","se"],["インドネシア","id"],["アルゼンチン","ar"]],
-    3: [["ノルウェー","no"],["フィンランド","fi"],["デンマーク","dk"],["ポーランド","pl"],["ウクライナ","ua"],["オランダ","nl"],["ベルギー","be"],["スイス","ch"],["オーストリア","at"],["チェコ","cz"]],
-    4: [["タイ","th"],["マレーシア","my"],["ベトナム","vn"],["フィリピン","ph"],["シンガポール","sg"],["ニュージーランド","nz"],["南アフリカ","za"],["エジプト","eg"],["ケニア","ke"],["モロッコ","ma"]],
-    5: [["ギリシャ","gr"],["ポルトガル","pt"],["アイルランド","ie"],["ハンガリー","hu"],["クロアチア","hr"],["ルーマニア","ro"],["ブルガリア","bg"],["セルビア","rs"],["スロバキア","sk"],["リトアニア","lt"]],
-    6: [["チリ","cl"],["コロンビア","co"],["ペルー","pe"],["ベネズエラ","ve"],["パキスタン","pk"],["バングラデシュ","bd"],["カタール","qa"],["アラブ首長国連邦","ae"],["イスラエル","il"],["ヨルダン","jo"]]
-};
-
-// ===== モード管理 =====
-let quizMode = null;  // "basic" or "flag"
-
-// ===== 共通変数 =====
-let currentQuestions = [];
-let index = 0;
-let startTime = 0;
-let timerInterval;
-
-// ▼▼▼ クイズ種類選択 ▼▼▼
-function selectQuiz(mode) {
-    quizMode = mode;
-}
-
-// ▼▼▼ レベル開始 ▼▼▼
-function startLevel(level) {
-    if (!quizMode) {
-        alert("先にクイズの種類を選択してください！");
-        return;
-    }
-
-    currentQuestions = [...levelData[level]].sort(() => Math.random() - 0.5);
-    index = 0;
-
-    document.getElementById("titleScreen").style.display = "none";
-    document.getElementById("resultScreen").style.display = "none";
-
-    if (quizMode === "basic") {
-        document.getElementById("quizScreenBasic").style.display = "block";
-        startTimer("basic");
-        showQuestionBasic();
-    } else {
-        document.getElementById("quizScreenFlag").style.display = "block";
-        startTimer("flag");
-        showQuestionFlag();
-    }
-}
-
-// ▼▼▼ タイマー ▼▼▼
-function startTimer(type) {
-    startTime = Date.now();
-    clearInterval(timerInterval);
-
-    timerInterval = setInterval(() => {
-        const sec = Math.floor((Date.now() - startTime) / 1000);
-        const timerId = type === "basic" ? "timerBasic" : "timerFlag";
-        document.getElementById(timerId).textContent = `タイム: ${sec}秒`;
-    }, 200);
-}
-function stopTimer() {
-    clearInterval(timerInterval);
-    return Math.floor((Date.now() - startTime) / 1000);
-}
-
-// ------------------------------------
-// ◆◆ モードA：元のクイズ（国名＋国旗表示）
-// ------------------------------------
-function showQuestionBasic() {
-    const q = currentQuestions[index];
-
-    document.getElementById("questionNumBasic").textContent = `第 ${index + 1} 問`;
-    document.getElementById("countryNameBasic").textContent = q[0];
-    document.getElementById("flagImageBasic").src = `https://flagcdn.com/h240/${q[1]}.png`;
-}
-
-function nextQuestionBasic() {
-    index++;
-    if (index >= 10) finishQuiz();
-    else showQuestionBasic();
-}
-
-// ------------------------------------
-// ◆◆ モードB：3択国旗クイズ
-// ------------------------------------
-function showQuestionFlag() {
-    const q = currentQuestions[index];
-    const correctCode = q[1];
-
-    document.getElementById("questionNumFlag").textContent = `第 ${index + 1} 問`;
-    document.getElementById("countryNameFlag").textContent = q[0];
-    document.getElementById("feedback").textContent = "";
-
-    let options = [correctCode];
-    const all = Object.values(levelData).flat();
-
-    while (options.length < 3) {
-        const pick = all[Math.floor(Math.random() * all.length)][1];
-        if (!options.includes(pick)) options.push(pick);
-    }
-
-    options.sort(() => Math.random() - 0.5);
-
-    const flagArea = document.getElementById("flagOptions");
-    flagArea.innerHTML = "";
-
-    options.forEach(code => {
-        const img = document.createElement("img");
-        img.src = `https://flagcdn.com/h240/${code}.png`;
-        img.className = "flag-option";
-        img.onclick = () => checkAnswerFlag(code, correctCode);
-        flagArea.appendChild(img);
-    });
-}
-
-function checkAnswerFlag(selected, correct) {
-    const fb = document.getElementById("feedback");
-
-    if (selected === correct) {
-        fb.textContent = "〇";
-        fb.style.color = "green";
-
-        setTimeout(() => {
-            index++;
-            if (index >= 10) finishQuiz();
-            else showQuestionFlag();
-        }, 800);
-
-    } else {
-        fb.textContent = "×";
-        fb.style.color = "red";
-
-        setTimeout(() => {
-            showQuestionFlag();
-        }, 800);
-    }
-}
-
-// ------------------------------------
-// ▼▼▼ 結果画面 ▼▼▼
-function finishQuiz() {
-    const sec = stopTimer();
-
-    document.getElementById("quizScreenBasic").style.display = "none";
-    document.getElementById("quizScreenFlag").style.display = "none";
-
-    document.getElementById("resultScreen").style.display = "block";
-    document.getElementById("resultTime").textContent = `タイム：${sec} 秒`;
-}
-
-// タイトルへ戻る
-function goTitle() {
-    document.getElementById("quizScreenBasic").style.display = "none";
-    document.getElementById("quizScreenFlag").style.display = "none";
-    document.getElementById("resultScreen").style.display = "none";
-    document.getElementById("titleScreen").style.display = "block";
-
-    quizMode = null;
-}
-</script>
-
+    <script src="data.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>

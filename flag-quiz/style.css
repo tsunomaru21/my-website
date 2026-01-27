@@ -1,63 +1,103 @@
 body {
+    font-family: "Arial", sans-serif;
     margin: 0;
     padding: 0;
-    font-family: "Verdana", sans-serif;
+    background: #f2f5f7;
+    display: flex;
+    justify-content: center;
+}
+
+.screen {
+    width: 100%;
+    max-width: 800px;
+    padding: 30px;
     text-align: center;
-    background: #f5f5f5;
-  }
-  
-  .screen {
+}
+
+.hidden {
     display: none;
-    padding: 20px;
-  }
-  
-  .screen.active {
-    display: block;
-  }
-  
-  h1, h2 {
-    margin-bottom: 20px;
-  }
-  
-  .level-buttons button,
-  #next-btn,
-  button {
-    font-size: 1.2rem;
-    padding: 10px 20px;
-    margin: 5px;
-    width: 80%;
-    max-width: 400px;
-  }
-  
-  img {
-    width: 90%;
-    max-width: 400px;
-    margin: 20px 0;
-    border: 1px solid #ccc;
-  }
-  
-  .hint-text {
-    font-size: 1.1rem;
-    margin: 10px 0;
-  }
-  
-  .timer {
-    font-size: 1.4rem;
+}
+
+h1 {
+    font-size: 2.4rem;
     margin-bottom: 10px;
-  }
-  
-  /* スマホ最適化 */
-  @media (max-width: 600px) {
-    h1 { font-size: 1.8rem; }
-    h2 { font-size: 1.4rem; }
-  
-    button {
-      font-size: 1.1rem;
-      padding: 12px;
-    }
-  
-    img {
-      width: 100%;
-    }
-  }
-  
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+.menu {
+    margin-top: 20px;
+}
+
+.menu-btn, .level-btn, .next-btn {
+    width: 80%;
+    max-width: 300px;
+    padding: 14px;
+    margin: 12px auto;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 10px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.menu-btn:hover,
+.level-btn:hover,
+.next-btn:hover {
+    background-color: #005fcc;
+}
+
+/* ---- 国名 ---- */
+.country-name {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+/* ---- 国旗（3択） ---- */
+.flag-options {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px auto;
+}
+
+.flag-option {
+    width: 150px;
+    border: 3px solid #bbb;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.flag-option img {
+    width: 100%;
+    height: auto;
+}
+
+.flag-option:hover {
+    transform: scale(1.05);
+    border-color: #007bff;
+}
+
+/* ---- 正解 × 不正解 ---- */
+.result-mark {
+    font-size: 5rem;
+    font-weight: bold;
+    margin-top: 20px;
+    height: 80px;
+    line-height: 80px;
+}
+
+.correct {
+    color: #28a745; /* 緑の〇 */
+}
+
+.wrong {
+    color: #dc3545; /* 赤の× */
+}
