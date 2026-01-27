@@ -1,210 +1,169 @@
-/* ==========================
-   共通データ
-========================== */
+// =======================================
+// 画面要素
+// =======================================
+const titleScreen = document.getElementById("title-screen");
+const levelScreen = document.getElementById("level-screen");
+const quizScreen = document.getElementById("quiz-screen");
 
-const levelData = {
-    1: [
-        ["日本", "jp"], ["アメリカ", "us"], ["カナダ", "ca"],
-        ["フランス", "fr"], ["ドイツ", "de"], ["イタリア", "it"],
-        ["中国", "cn"], ["韓国", "kr"], ["イギリス", "gb"], ["オーストラリア", "au"]
-    ],
-    2: [
-        ["インド", "in"], ["ブラジル", "br"], ["ロシア", "ru"],
-        ["メキシコ", "mx"], ["スペイン", "es"], ["トルコ", "tr"],
-        ["サウジアラビア", "sa"], ["スウェーデン", "se"], ["インドネシア", "id"], ["アルゼンチン", "ar"]
-    ],
-    3: [
-        ["ノルウェー", "no"], ["フィンランド", "fi"], ["デンマーク", "dk"],
-        ["ポーランド", "pl"], ["ウクライナ", "ua"], ["オランダ", "nl"],
-        ["ベルギー", "be"], ["スイス", "ch"], ["オーストリア", "at"], ["チェコ", "cz"]
-    ],
-    4: [
-        ["タイ", "th"], ["マレーシア", "my"], ["ベトナム", "vn"],
-        ["フィリピン", "ph"], ["シンガポール", "sg"], ["ニュージーランド", "nz"],
-        ["南アフリカ", "za"], ["エジプト", "eg"], ["ケニア", "ke"], ["モロッコ", "ma"]
-    ],
-    5: [
-        ["ギリシャ", "gr"], ["ポルトガル", "pt"], ["アイルランド", "ie"],
-        ["ハンガリー", "hu"], ["クロアチア", "hr"], ["ルーマニア", "ro"],
-        ["ブルガリア", "bg"], ["セルビア", "rs"], ["スロバキア", "sk"], ["リトアニア", "lt"]
-    ],
-    6: [
-        ["チリ", "cl"], ["コロンビア", "co"], ["ペルー", "pe"],
-        ["ベネズエラ", "ve"], ["パキスタン", "pk"], ["バングラデシュ", "bd"],
-        ["カタール", "qa"], ["アラブ首長国連邦", "ae"], ["イスラエル", "il"], ["ヨルダン", "jo"]
-    ]
-};
+const countryName = document.getElementById("country-name");
+const flagOptions = document.getElementById("flag-options");
+const resultMark = document.getElementById("result-mark");
+const timerDisplay = document.getElementById("timer");
+const currentLevelLabel = document.getElementById("current-level");
 
-/* ==========================
-   変数
-========================== */
-let gameType = ""; // "flag" or "country"
-let currentQuestions = [];
-let index = 0;
-let startTime = 0;
-let timerInterval;
+// =======================================
+// 変数
+// =======================================
+let currentQuizType = null;      // "location" or "flag"
+let level = 1;
+let questions = [];
+let questionIndex = 0;
 
-/* 効果音 */
+let timer = null;
+let timeSec = 0;
+
 const correctSound = new Audio("correct.wav");
 const wrongSound = new Audio("wrong.wav");
 
-/* ==========================
-   タイトル画面へ戻る
-========================== */
-function goTitle() {
-    document.getElementById("quizTypeScreen").style.display = "block";
-    document.getElementById("levelScreen").style.display = "none";
-    document.getElementById("quizScreen").style.display = "none";
-    document.getElementById("flagQuizScreen").style.display = "none";
-    document.getElementById("resultScreen").style.display = "none";
+// =======================================
+// 画面遷移
+// =======================================
+function selectQuiz(type) {
+    currentQuizType = type;
+
+    // タイトルを消してレベル選択へ
+    titleScreen.classList.add("hidden");
+    levelScreen.classList.remove("hidden");
 }
 
-/* ==========================
-   クイズの種類を選択
-========================== */
-function selectGame(type) {
-    gameType = type;
-
-    document.getElementById("quizTypeScreen").style.display = "none";
-    document.getElementById("levelScreen").style.display = "block";
+function backToTitle() {
+    levelScreen.classList.add("hidden");
+    quizScreen.classList.add("hidden");
+    titleScreen.classList.remove("hidden");
 }
 
-/* ==========================
-   レベル開始
-========================== */
-function startLevel(level) {
+function returnToLevel() {
+    quizScreen.classList.add("hidden");
+    levelScreen.classList.remove("hidden");
+}
 
-    currentQuestions = [...levelData[level]]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 10);
+// =======================================
+// ゲーム開始
+// =======================================
+function startGame(selectedLevel) {
+    level = selectedLevel;
+    questionIndex = 0;
+    timeSec = 0;
 
-    index = 0;
+    currentLevelLabel.textContent = "レベル " + level;
 
-    document.getElementById("levelScreen").style.display = "none";
+    // レベルに応じたデータを取得
+    questions = quizData["level" + level];
 
-    if (gameType === "country") {
-        document.getElementById("quizScreen").style.display = "block";
-    } else {
-        document.getElementById("flagQuizScreen").style.display = "block";
-    }
+    // 画面遷移
+    levelScreen.classList.add("hidden");
+    quizScreen.classList.remove("hidden");
 
     startTimer();
     showQuestion();
 }
 
-/* ==========================
-   タイマー
-========================== */
+// =======================================
+// タイマー
+// =======================================
 function startTimer() {
-    startTime = Date.now();
-    clearInterval(timerInterval);
+    if (timer) clearInterval(timer);
 
-    timerInterval = setInterval(() => {
-        const now = Date.now();
-        const sec = Math.floor((now - startTime) / 1000);
-        document.getElementById("timer").textContent = `タイム: ${sec}秒`;
-    }, 200);
+    timer = setInterval(() => {
+        timeSec++;
+        const m = String(Math.floor(timeSec / 60)).padStart(2, "0");
+        const s = String(timeSec % 60).padStart(2, "0");
+        timerDisplay.textContent = `${m}:${s}`;
+    }, 1000);
 }
 
 function stopTimer() {
-    clearInterval(timerInterval);
-    return Math.floor((Date.now() - startTime) / 1000);
+    if (timer) clearInterval(timer);
+    timer = null;
 }
 
-/* ==========================
-   国名クイズ（地球儀を探す）
-========================== */
+// =======================================
+// 問題表示
+// =======================================
 function showQuestion() {
-    const q = currentQuestions[index];
+    const q = questions[questionIndex];
 
-    document.getElementById("questionNum").textContent = `第 ${index + 1} 問`;
-    document.getElementById("countryName").textContent = q[0];
+    resultMark.textContent = "";
+    countryName.textContent = q.name;
 
-    if (gameType === "country") {
-        document.getElementById("flagImage").src = `https://flagcdn.com/h240/${q[1]}.png`;
-    } else {
-        createFlagChoices(q);
+    // 「場所をさがす」は国名だけ出す
+    if (currentQuizType === "location") {
+        flagOptions.classList.add("hidden");
+        return;
+    }
+
+    // 「国旗３択クイズ」
+    createFlagChoices(q);
+}
+
+// =======================================
+// 国旗３択生成
+// =======================================
+function createFlagChoices(q) {
+    flagOptions.innerHTML = "";
+    flagOptions.classList.remove("hidden");
+
+    let choices = shuffle([q.correctFlag, q.wrongFlag1, q.wrongFlag2]);
+
+    for (let imgSrc of choices) {
+        let img = document.createElement("img");
+        img.src = imgSrc;
+        img.className = "flag-option";
+
+        img.onclick = () => checkFlagAnswer(imgSrc, q.correctFlag);
+        flagOptions.appendChild(img);
     }
 }
 
-/* ==========================
-   国旗3択クイズを表示
-========================== */
-function createFlagChoices(correctQ) {
-    const correctCode = correctQ[1];
-
-    // 不正解候補を作る
-    const others = Object.values(levelData).flat()
-        .filter(c => c[1] !== correctCode)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 2);
-
-    const choices = [
-        correctQ,
-        ...others
-    ].sort(() => Math.random() - 0.5);
-
-    let html = "";
-    choices.forEach(ch => {
-        html += `
-            <div class="flagChoice" onclick="selectFlag('${correctCode}', '${ch[1]}')">
-                <img src="https://flagcdn.com/h160/${ch[1]}.png">
-            </div>
-        `;
-    });
-
-    document.getElementById("flagChoices").innerHTML = html;
-}
-
-/* ==========================
-   国旗の回答チェック
-========================== */
-function selectFlag(correctCode, selectedCode) {
-    const resultBox = document.getElementById("judge");
-
-    if (correctCode === selectedCode) {
+// =======================================
+// 正誤判定
+// =======================================
+function checkFlagAnswer(selected, correct) {
+    if (selected === correct) {
+        resultMark.textContent = "〇";
+        resultMark.className = "correct";
         correctSound.play();
-        resultBox.textContent = "〇";
-        resultBox.style.color = "green";
 
         setTimeout(() => {
-            resultBox.textContent = "";
             nextQuestion();
-        }, 800);
-
+        }, 700);
     } else {
+        resultMark.textContent = "×";
+        resultMark.className = "wrong";
         wrongSound.play();
-        resultBox.textContent = "×";
-        resultBox.style.color = "red";
-
-        setTimeout(() => {
-            resultBox.textContent = "";
-        }, 800);
     }
 }
 
-/* ==========================
-   次の問題へ
-========================== */
+// =======================================
+// 次の問題
+// =======================================
 function nextQuestion() {
-    index++;
+    questionIndex++;
 
-    if (index >= 10) {
-        finishQuiz();
-    } else {
-        showQuestion();
+    if (questionIndex >= questions.length) {
+        // 終了
+        stopTimer();
+        countryName.textContent = "おわり！";
+        flagOptions.classList.add("hidden");
+        return;
     }
+
+    showQuestion();
 }
 
-/* ==========================
-   結果表示
-========================== */
-function finishQuiz() {
-    const sec = stopTimer();
-
-    document.getElementById("quizScreen").style.display = "none";
-    document.getElementById("flagQuizScreen").style.display = "none";
-    document.getElementById("resultScreen").style.display = "block";
-
-    document.getElementById("resultTime").textContent = `タイム：${sec} 秒`;
+// =======================================
+// シャッフル関数
+// =======================================
+function shuffle(arr) {
+    return arr.sort(() => Math.random() - 0.5);
 }
