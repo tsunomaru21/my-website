@@ -1,57 +1,274 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>国旗クイズ ver1.1</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>国旗クイズ ver2.0</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        background: #f7f7f7;
+    }
+    #container {
+        width: 100%;
+        max-width: 900px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    h1, h2 {
+        margin-top: 0;
+    }
+    img.flag {
+        width: 100%;
+        max-width: 360px;
+        border: 1px solid #ccc;
+        margin: 16px 0;
+    }
+    button {
+        display: block;
+        width: 90%;
+        max-width: 320px;
+        margin: 10px auto;
+        padding: 16px;
+        font-size: 1.2rem;
+        border-radius: 10px;
+        border: none;
+        background: #007BFF;
+        color: white;
+    }
+    .choiceBtn {
+        width: 30%;
+        max-width: 150px;
+        margin: 10px;
+        display: inline-block;
+    }
+    #timer {
+        font-size: 1.4rem;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+    #mark {
+        font-size: 3rem;
+        font-weight: bold;
+        height: 3rem;
+        margin: 12px;
+    }
+</style>
 </head>
 <body>
 
-<div id="title-screen">
-    <h1>国旗クイズ <span class="ver">ver1.1</span></h1>
-    <p>クイズの種類を選んでください</p>
+<div id="container">
 
-    <button class="menu-btn" onclick="selectQuiz('location')">
-        国名 → 場所をさがす
-    </button>
+    <!-- タイトル画面 -->
+    <div id="titleScreen">
+        <h1>国旗クイズ</h1>
+        <h2>クイズの種類を選んでください</h2>
 
-    <button class="menu-btn" onclick="selectQuiz('flag')">
-        国名 → 国旗３択クイズ
-    </button>
-</div>
-
-<div id="level-screen" class="hidden">
-    <h2>レベルを選んでください</h2>
-    <div id="level-buttons">
-        <button onclick="startGame(1)">レベル1</button>
-        <button onclick="startGame(2)">レベル2</button>
-        <button onclick="startGame(3)">レベル3</button>
-        <button onclick="startGame(4)">レベル4</button>
-        <button onclick="startGame(5)">レベル5</button>
-        <button onclick="startGame(6)">レベル6</button>
+        <button onclick="chooseMode(1)">国名 → 場所をさがす</button>
+        <button onclick="chooseMode(2)">国名 → 国旗3択クイズ</button>
     </div>
 
-    <button class="back-btn" onclick="backToTitle()">タイトルへ戻る</button>
-</div>
+    <!-- レベル選択 -->
+    <div id="levelScreen" style="display:none;">
+        <h2>レベルを選んでください</h2>
 
-<div id="quiz-screen" class="hidden">
-    <div id="header">
-        <span id="current-level"></span>
-        <span id="timer">00:00</span>
+        <button onclick="startLevel(1)">レベル1（10問）</button>
+        <button onclick="startLevel(2)">レベル2（10問）</button>
+        <button onclick="startLevel(3)">レベル3（10問）</button>
+        <button onclick="startLevel(4)">レベル4（10問）</button>
+        <button onclick="startLevel(5)">レベル5（10問）</button>
+        <button onclick="startLevel(6)">レベル6（10問）</button>
+
+        <button onclick="goTitle()">戻る</button>
     </div>
 
-    <h2 id="country-name">国名</h2>
+    <!-- クイズ画面（1種類目） -->
+    <div id="quizScreen1" style="display:none;">
+        <h2 id="qNum1"></h2>
+        <img id="flagImage" class="flag" src="">
+        <h2 id="countryName1"></h2>
+        <button onclick="nextQuestion1()">次へ</button>
+        <div id="timer1">タイム: 0秒</div>
+    </div>
 
-    <div id="flag-options" class="hidden"></div>
+    <!-- クイズ画面（2種類目） -->
+    <div id="quizScreen2" style="display:none;">
+        <h2 id="qNum2"></h2>
+        <h2 id="countryName2"></h2>
 
-    <div id="result-mark"></div>
+        <div id="choices"></div>
+        <div id="mark"></div>
 
-    <button class="back-btn" onclick="returnToLevel()">レベル選択に戻る</button>
+        <div id="timer2">タイム: 0秒</div>
+    </div>
+
+    <!-- 結果画面 -->
+    <div id="resultScreen" style="display:none;">
+        <h2>終了！</h2>
+        <p id="resultTime"></p>
+        <button onclick="goTitle()">タイトルに戻る</button>
+    </div>
+
 </div>
 
-<script src="data.js"></script>
-<script src="game.js"></script>
+<script>
+/* ========= 効果音（base64で埋め込み） ========= */
+const correctSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
+const wrongSound   = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
 
+/* ========= 国データ ========= */
+const levelData = {
+    1: [["日本","jp"],["アメリカ","us"],["カナダ","ca"],["フランス","fr"],["ドイツ","de"],["イタリア","it"],["中国","cn"],["韓国","kr"],["イギリス","gb"],["オーストラリア","au"]],
+    2: [["インド","in"],["ブラジル","br"],["ロシア","ru"],["メキシコ","mx"],["スペイン","es"],["トルコ","tr"],["サウジアラビア","sa"],["スウェーデン","se"],["インドネシア","id"],["アルゼンチン","ar"]],
+    3: [["ノルウェー","no"],["フィンランド","fi"],["デンマーク","dk"],["ポーランド","pl"],["ウクライナ","ua"],["オランダ","nl"],["ベルギー","be"],["スイス","ch"],["オーストリア","at"],["チェコ","cz"]],
+    4: [["タイ","th"],["マレーシア","my"],["ベトナム","vn"],["フィリピン","ph"],["シンガポール","sg"],["ニュージーランド","nz"],["南アフリカ","za"],["エジプト","eg"],["ケニア","ke"],["モロッコ","ma"]],
+    5: [["ギリシャ","gr"],["ポルトガル","pt"],["アイルランド","ie"],["ハンガリー","hu"],["クロアチア","hr"],["ルーマニア","ro"],["ブルガリア","bg"],["セルビア","rs"],["スロバキア","sk"],["リトアニア","lt"]],
+    6: [["チリ","cl"],["コロンビア","co"],["ペルー","pe"],["ベネズエラ","ve"],["パキスタン","pk"],["バングラデシュ","bd"],["カタール","qa"],["アラブ首長国連邦","ae"],["イスラエル","il"],["ヨルダン","jo"]]
+};
+
+/* ========= 共通変数 ========= */
+let mode = 1;              // 1 = 場所探し, 2 = 国旗3択
+let level = 1;
+let indexQ = 0;
+let questions = [];
+let timer;
+let startT;
+
+/* ========= タイトルへ戻る ========= */
+function goTitle() {
+    hideAll();
+    document.getElementById("titleScreen").style.display = "block";
+}
+
+function hideAll() {
+    document.getElementById("titleScreen").style.display = "none";
+    document.getElementById("levelScreen").style.display = "none";
+    document.getElementById("quizScreen1").style.display = "none";
+    document.getElementById("quizScreen2").style.display = "none";
+    document.getElementById("resultScreen").style.display = "none";
+}
+
+/* ========= 1. クイズ種類選択 ========= */
+function chooseMode(m) {
+    mode = m;
+    hideAll();
+    document.getElementById("levelScreen").style.display = "block";
+}
+
+/* ========= 2. レベル開始 ========= */
+function startLevel(lv) {
+    level = lv;
+
+    questions = [...levelData[level]].sort(() => Math.random() - 0.5);
+
+    indexQ = 0;
+    startTimer();
+
+    hideAll();
+    if (mode === 1) document.getElementById("quizScreen1").style.display = "block";
+    else document.getElementById("quizScreen2").style.display = "block";
+
+    showQuestion();
+}
+
+/* ========= タイマー ========= */
+function startTimer() {
+    startT = Date.now();
+    clearInterval(timer);
+    timer = setInterval(() => {
+        const sec = Math.floor((Date.now() - startT) / 1000);
+        if (mode === 1) document.getElementById("timer1").textContent = `タイム: ${sec}秒`;
+        else document.getElementById("timer2").textContent = `タイム: ${sec}秒`;
+    }, 200);
+}
+function stopTimer() {
+    clearInterval(timer);
+    return Math.floor((Date.now() - startT) / 1000);
+}
+
+/* ========= 3. 問題表示 ========= */
+function showQuestion() {
+    const q = questions[indexQ];
+
+    if (mode === 1) showQuestion1(q);
+    else showQuestion2(q);
+}
+
+/* =========（1種類目）場所探し ========= */
+function showQuestion1(q) {
+    document.getElementById("qNum1").textContent = `第 ${indexQ+1} 問`;
+    document.getElementById("countryName1").textContent = q[0];
+    document.getElementById("flagImage").src = `https://flagcdn.com/h240/${q[1]}.png`;
+}
+
+function nextQuestion1() {
+    indexQ++;
+    if (indexQ >= 10) return finishQuiz();
+    showQuestion();
+}
+
+/* =========（2種類目）3択クイズ ========= */
+function showQuestion2(q) {
+    document.getElementById("qNum2").textContent = `第 ${indexQ+1} 問`;
+    document.getElementById("countryName2").textContent = q[0];
+    document.getElementById("mark").textContent = "";
+
+    const correct = q[1];
+
+    // 不正解の候補
+    let all = Object.values(levelData).flat();
+    let wrong = all.filter(x => x[1] !== correct);
+    wrong = wrong.sort(() => Math.random() - 0.5).slice(0, 2);
+
+    const choices = [
+        ["正解", correct],
+        ["不正解", wrong[0][1]],
+        ["不正解", wrong[1][1]]
+    ].sort(() => Math.random() - 0.5);
+
+    let html = "";
+    choices.forEach(c => {
+        html += `
+            <img class="choiceBtn" 
+                src="https://flagcdn.com/h120/${c[1]}.png"
+                onclick="checkAnswer('${c[0]}')">
+        `;
+    });
+
+    document.getElementById("choices").innerHTML = html;
+}
+
+function checkAnswer(result) {
+    if (result === "正解") {
+        document.getElementById("mark").textContent = "○";
+        correctSound.play();
+        setTimeout(() => {
+            indexQ++;
+            if (indexQ >= 10) return finishQuiz();
+            showQuestion();
+        }, 700);
+    } else {
+        document.getElementById("mark").textContent = "×";
+        wrongSound.play();
+        setTimeout(() => showQuestion(), 800);
+    }
+}
+
+/* ========= 結果 ========= */
+function finishQuiz() {
+    const sec = stopTimer();
+    hideAll();
+    document.getElementById("resultScreen").style.display = "block";
+    document.getElementById("resultTime").textContent = `タイム：${sec} 秒`;
+}
+</script>
 </body>
 </html>
