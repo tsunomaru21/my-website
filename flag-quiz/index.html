@@ -1,42 +1,33 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>国旗クイズ ver2.0</title>
 
 <style>
     body {
         font-family: Arial, sans-serif;
+        background: #f7f7f7;
         margin: 0;
         padding: 20px;
         display: flex;
         justify-content: center;
-        background: #f7f7f7;
     }
     #container {
         width: 100%;
-        max-width: 900px;
+        max-width: 800px;
         background: #fff;
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
         text-align: center;
     }
-    h1, h2 {
-        margin-top: 0;
-    }
-    img.flag {
-        width: 100%;
-        max-width: 360px;
-        border: 1px solid #ccc;
-        margin: 16px 0;
-    }
     button {
         display: block;
         width: 90%;
-        max-width: 320px;
-        margin: 10px auto;
+        max-width: 360px;
+        margin: 12px auto;
         padding: 16px;
         font-size: 1.2rem;
         border-radius: 10px;
@@ -44,22 +35,25 @@
         background: #007BFF;
         color: white;
     }
-    .choiceBtn {
-        width: 30%;
-        max-width: 150px;
-        margin: 10px;
-        display: inline-block;
+    img {
+        max-width: 450px;
+        width: 100%;
+        border: 1px solid #ccc;
+        margin: 20px 0;
     }
     #timer {
         font-size: 1.4rem;
         margin-top: 10px;
-        font-weight: bold;
     }
-    #mark {
-        font-size: 3rem;
-        font-weight: bold;
-        height: 3rem;
-        margin: 12px;
+    .choices {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .choiceFlag {
+        width: 30%;
+        border: 2px solid #aaa;
     }
 </style>
 </head>
@@ -67,16 +61,16 @@
 
 <div id="container">
 
-    <!-- タイトル画面 -->
+    <!-- タイトル（新） -->
     <div id="titleScreen">
-        <h1>国旗クイズ</h1>
+        <h1>国旗クイズ（ver2.0）</h1>
         <h2>クイズの種類を選んでください</h2>
 
-        <button onclick="chooseMode(1)">国名 → 場所をさがす</button>
-        <button onclick="chooseMode(2)">国名 → 国旗3択クイズ</button>
+        <button onclick="selectMode('find')">国旗を見て場所を探す</button>
+        <button onclick="selectMode('choice')">国旗３択クイズ</button>
     </div>
 
-    <!-- レベル選択 -->
+    <!-- レベル選択画面 -->
     <div id="levelScreen" style="display:none;">
         <h2>レベルを選んでください</h2>
 
@@ -87,27 +81,31 @@
         <button onclick="startLevel(5)">レベル5（10問）</button>
         <button onclick="startLevel(6)">レベル6（10問）</button>
 
-        <button onclick="goTitle()">戻る</button>
+        <button style="background:#555;" onclick="goTitle()">戻る</button>
     </div>
 
-    <!-- クイズ画面（1種類目） -->
-    <div id="quizScreen1" style="display:none;">
-        <h2 id="qNum1"></h2>
-        <img id="flagImage" class="flag" src="">
-        <h2 id="countryName1"></h2>
-        <button onclick="nextQuestion1()">次へ</button>
-        <div id="timer1">タイム: 0秒</div>
+    <!-- クイズ画面（場所探し） -->
+    <div id="quizFind" style="display:none;">
+        <h2 id="qNumFind"></h2>
+        <img id="flagFind">
+        <h2 id="nameFind"></h2>
+        <button onclick="nextFind()">次へ</button>
+        <div id="timerFind"></div>
     </div>
 
-    <!-- クイズ画面（2種類目） -->
-    <div id="quizScreen2" style="display:none;">
-        <h2 id="qNum2"></h2>
-        <h2 id="countryName2"></h2>
+    <!-- クイズ画面（３択） -->
+    <div id="quizChoice" style="display:none;">
+        <h2 id="qNumChoice"></h2>
+        <h2 id="nameChoice"></h2>
 
-        <div id="choices"></div>
-        <div id="mark"></div>
+        <div class="choices">
+            <img class="choiceFlag" id="choice1" onclick="answerChoice(1)">
+            <img class="choiceFlag" id="choice2" onclick="answerChoice(2)">
+            <img class="choiceFlag" id="choice3" onclick="answerChoice(3)">
+        </div>
 
-        <div id="timer2">タイム: 0秒</div>
+        <div id="judge" style="font-size:2rem; margin-top:20px;"></div>
+        <div id="timerChoice"></div>
     </div>
 
     <!-- 結果画面 -->
@@ -119,156 +117,175 @@
 
 </div>
 
-<script>
-/* ========= 効果音（base64で埋め込み） ========= */
-const correctSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
-const wrongSound   = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
 
-/* ========= 国データ ========= */
+<script>
+// =====================
+// 国データ（既存のまま）
+// =====================
 const levelData = {
-    1: [["日本","jp"],["アメリカ","us"],["カナダ","ca"],["フランス","fr"],["ドイツ","de"],["イタリア","it"],["中国","cn"],["韓国","kr"],["イギリス","gb"],["オーストラリア","au"]],
-    2: [["インド","in"],["ブラジル","br"],["ロシア","ru"],["メキシコ","mx"],["スペイン","es"],["トルコ","tr"],["サウジアラビア","sa"],["スウェーデン","se"],["インドネシア","id"],["アルゼンチン","ar"]],
-    3: [["ノルウェー","no"],["フィンランド","fi"],["デンマーク","dk"],["ポーランド","pl"],["ウクライナ","ua"],["オランダ","nl"],["ベルギー","be"],["スイス","ch"],["オーストリア","at"],["チェコ","cz"]],
-    4: [["タイ","th"],["マレーシア","my"],["ベトナム","vn"],["フィリピン","ph"],["シンガポール","sg"],["ニュージーランド","nz"],["南アフリカ","za"],["エジプト","eg"],["ケニア","ke"],["モロッコ","ma"]],
-    5: [["ギリシャ","gr"],["ポルトガル","pt"],["アイルランド","ie"],["ハンガリー","hu"],["クロアチア","hr"],["ルーマニア","ro"],["ブルガリア","bg"],["セルビア","rs"],["スロバキア","sk"],["リトアニア","lt"]],
-    6: [["チリ","cl"],["コロンビア","co"],["ペルー","pe"],["ベネズエラ","ve"],["パキスタン","pk"],["バングラデシュ","bd"],["カタール","qa"],["アラブ首長国連邦","ae"],["イスラエル","il"],["ヨルダン","jo"]]
+    1: [
+        ["日本","jp"],["アメリカ","us"],["カナダ","ca"],["フランス","fr"],["ドイツ","de"],
+        ["イタリア","it"],["中国","cn"],["韓国","kr"],["イギリス","gb"],["オーストラリア","au"]
+    ],
+    2: [
+        ["インド","in"],["ブラジル","br"],["ロシア","ru"],["メキシコ","mx"],["スペイン","es"],
+        ["トルコ","tr"],["サウジアラビア","sa"],["スウェーデン","se"],["インドネシア","id"],["アルゼンチン","ar"]
+    ],
+    3: [
+        ["ノルウェー","no"],["フィンランド","fi"],["デンマーク","dk"],["ポーランド","pl"],["ウクライナ","ua"],
+        ["オランダ","nl"],["ベルギー","be"],["スイス","ch"],["オーストリア","at"],["チェコ","cz"]
+    ],
+    4: [
+        ["タイ","th"],["マレーシア","my"],["ベトナム","vn"],["フィリピン","ph"],["シンガポール","sg"],
+        ["ニュージーランド","nz"],["南アフリカ","za"],["エジプト","eg"],["ケニア","ke"],["モロッコ","ma"]
+    ],
+    5: [
+        ["ギリシャ","gr"],["ポルトガル","pt"],["アイルランド","ie"],["ハンガリー","hu"],["クロアチア","hr"],
+        ["ルーマニア","ro"],["ブルガリア","bg"],["セルビア","rs"],["スロバキア","sk"],["リトアニア","lt"]
+    ],
+    6: [
+        ["チリ","cl"],["コロンビア","co"],["ペルー","pe"],["ベネズエラ","ve"],["パキスタン","pk"],
+        ["バングラデシュ","bd"],["カタール","qa"],["アラブ首長国連邦","ae"],["イスラエル","il"],["ヨルダン","jo"]
+    ]
 };
 
-/* ========= 共通変数 ========= */
-let mode = 1;              // 1 = 場所探し, 2 = 国旗3択
-let level = 1;
-let indexQ = 0;
-let questions = [];
+// =====================
+// グローバル変数
+// =====================
+let selectedMode = ""; 
+let current = [];
+let idx = 0;
+let startTime;
 let timer;
-let startT;
 
-/* ========= タイトルへ戻る ========= */
-function goTitle() {
-    hideAll();
-    document.getElementById("titleScreen").style.display = "block";
+// =====================
+// 画面遷移
+// =====================
+function goTitle(){
+    show("titleScreen");
 }
 
-function hideAll() {
-    document.getElementById("titleScreen").style.display = "none";
-    document.getElementById("levelScreen").style.display = "none";
-    document.getElementById("quizScreen1").style.display = "none";
-    document.getElementById("quizScreen2").style.display = "none";
-    document.getElementById("resultScreen").style.display = "none";
+function selectMode(mode){
+    selectedMode = mode;
+    show("levelScreen");
 }
 
-/* ========= 1. クイズ種類選択 ========= */
-function chooseMode(m) {
-    mode = m;
-    hideAll();
-    document.getElementById("levelScreen").style.display = "block";
+function show(screen){
+    const ids = ["titleScreen","levelScreen","quizFind","quizChoice","resultScreen"];
+    ids.forEach(id => document.getElementById(id).style.display = "none");
+    document.getElementById(screen).style.display = "block";
 }
 
-/* ========= 2. レベル開始 ========= */
-function startLevel(lv) {
-    level = lv;
+// =====================
+// レベル開始
+// =====================
+function startLevel(level){
+    if(!selectedMode){
+        alert("クイズの種類を選んでください！");
+        return;
+    }
 
-    questions = [...levelData[level]].sort(() => Math.random() - 0.5);
+    current = [...levelData[level]].sort(()=>Math.random()-0.5);
+    idx = 0;
 
-    indexQ = 0;
     startTimer();
 
-    hideAll();
-    if (mode === 1) document.getElementById("quizScreen1").style.display = "block";
-    else document.getElementById("quizScreen2").style.display = "block";
-
-    showQuestion();
-}
-
-/* ========= タイマー ========= */
-function startTimer() {
-    startT = Date.now();
-    clearInterval(timer);
-    timer = setInterval(() => {
-        const sec = Math.floor((Date.now() - startT) / 1000);
-        if (mode === 1) document.getElementById("timer1").textContent = `タイム: ${sec}秒`;
-        else document.getElementById("timer2").textContent = `タイム: ${sec}秒`;
-    }, 200);
-}
-function stopTimer() {
-    clearInterval(timer);
-    return Math.floor((Date.now() - startT) / 1000);
-}
-
-/* ========= 3. 問題表示 ========= */
-function showQuestion() {
-    const q = questions[indexQ];
-
-    if (mode === 1) showQuestion1(q);
-    else showQuestion2(q);
-}
-
-/* =========（1種類目）場所探し ========= */
-function showQuestion1(q) {
-    document.getElementById("qNum1").textContent = `第 ${indexQ+1} 問`;
-    document.getElementById("countryName1").textContent = q[0];
-    document.getElementById("flagImage").src = `https://flagcdn.com/h240/${q[1]}.png`;
-}
-
-function nextQuestion1() {
-    indexQ++;
-    if (indexQ >= 10) return finishQuiz();
-    showQuestion();
-}
-
-/* =========（2種類目）3択クイズ ========= */
-function showQuestion2(q) {
-    document.getElementById("qNum2").textContent = `第 ${indexQ+1} 問`;
-    document.getElementById("countryName2").textContent = q[0];
-    document.getElementById("mark").textContent = "";
-
-    const correct = q[1];
-
-    // 不正解の候補
-    let all = Object.values(levelData).flat();
-    let wrong = all.filter(x => x[1] !== correct);
-    wrong = wrong.sort(() => Math.random() - 0.5).slice(0, 2);
-
-    const choices = [
-        ["正解", correct],
-        ["不正解", wrong[0][1]],
-        ["不正解", wrong[1][1]]
-    ].sort(() => Math.random() - 0.5);
-
-    let html = "";
-    choices.forEach(c => {
-        html += `
-            <img class="choiceBtn" 
-                src="https://flagcdn.com/h120/${c[1]}.png"
-                onclick="checkAnswer('${c[0]}')">
-        `;
-    });
-
-    document.getElementById("choices").innerHTML = html;
-}
-
-function checkAnswer(result) {
-    if (result === "正解") {
-        document.getElementById("mark").textContent = "○";
-        correctSound.play();
-        setTimeout(() => {
-            indexQ++;
-            if (indexQ >= 10) return finishQuiz();
-            showQuestion();
-        }, 700);
+    if(selectedMode === "find"){
+        show("quizFind");
+        showFind();
     } else {
-        document.getElementById("mark").textContent = "×";
-        wrongSound.play();
-        setTimeout(() => showQuestion(), 800);
+        show("quizChoice");
+        showChoice();
     }
 }
 
-/* ========= 結果 ========= */
-function finishQuiz() {
-    const sec = stopTimer();
-    hideAll();
-    document.getElementById("resultScreen").style.display = "block";
-    document.getElementById("resultTime").textContent = `タイム：${sec} 秒`;
+// ==========================
+// タイマー
+// ==========================
+function startTimer(){
+    startTime = Date.now();
+    clearInterval(timer);
+
+    timer = setInterval(()=>{
+        const sec = Math.floor((Date.now()-startTime)/1000);
+        if(selectedMode==="find"){
+            document.getElementById("timerFind").textContent = `タイム: ${sec} 秒`;
+        } else {
+            document.getElementById("timerChoice").textContent = `タイム: ${sec} 秒`;
+        }
+    },200);
 }
+
+function stopTimer(){
+    clearInterval(timer);
+    return Math.floor((Date.now()-startTime)/1000);
+}
+
+// ===============================
+// 1種類目：国旗→場所探し
+// ===============================
+function showFind(){
+    const q = current[idx];
+    document.getElementById("qNumFind").textContent = `第 ${idx+1} 問`;
+    document.getElementById("nameFind").textContent = q[0];
+    document.getElementById("flagFind").src = `https://flagcdn.com/h240/${q[1]}.png`;
+}
+
+function nextFind(){
+    idx++;
+    if(idx>=10){
+        finishQuiz();
+    } else {
+        showFind();
+    }
+}
+
+// ===============================
+// 2種類目：国旗3択
+// ===============================
+function showChoice(){
+    const q = current[idx];
+    document.getElementById("qNumChoice").textContent = `第 ${idx+1} 問`;
+    document.getElementById("nameChoice").textContent = q[0];
+
+    // シャッフルして3択生成
+    const options = [...levelData[1],...levelData[2],...levelData[3],...levelData[4],...levelData[5],...levelData[6]];
+    const wrong = options.filter(o => o[1] !== q[1]).sort(()=>Math.random()-0.5).slice(0,2);
+    const flags = [q, ...wrong].sort(()=>Math.random()-0.5);
+
+    for(let i=0; i<3; i++){
+        document.getElementById(`choice${i+1}`).src = `https://flagcdn.com/h120/${flags[i][1]}.png`;
+        document.getElementById(`choice${i+1}`).dataset.correct = (flags[i][1] === q[1]);
+    }
+
+    document.getElementById("judge").textContent = "";
+}
+
+function answerChoice(n){
+    const isCorrect = document.getElementById(`choice${n}`).dataset.correct === "true";
+
+    if(isCorrect){
+        document.getElementById("judge").textContent = "⭕ 正解！";
+        setTimeout(()=>{
+            idx++;
+            if(idx>=10) finishQuiz();
+            else showChoice();
+        },700);
+    }else{
+        document.getElementById("judge").textContent = "❌ もう一度！";
+    }
+}
+
+// ===============================
+// 結果画面
+// ===============================
+function finishQuiz(){
+    const sec = stopTimer();
+    document.getElementById("resultTime").textContent = `タイム：${sec} 秒`;
+    show("resultScreen");
+}
+
 </script>
+
 </body>
 </html>
