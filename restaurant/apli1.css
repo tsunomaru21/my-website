@@ -1,0 +1,121 @@
+/*
+body{
+    background-image: url(haikei.jpg);
+	background-attachment: fixed;
+}
+*/
+
+#title{
+	font-size: 28px;
+	color: black;
+	width: 240px;
+    height: 40px;
+    top: 20px;
+    left: 20px;
+	border-style: none;
+	border-width: 4px 4px 4px 4px;
+	border-color: white;
+	background-color: white;
+	margin-top: 100px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.button{
+	font-size: 20px;
+	width: 100px;
+	height: 30px;
+	background-color: yellow;
+    border-style: ridge;
+	text-align: center;
+}
+
+#contents_1{
+	position: absolute;
+	top: 150px;
+	left: 50px;
+}
+
+#contents_2{
+    position: absolute;
+	top: 150px;
+	left: 180px;
+}
+
+#contents_3{
+    position: absolute;
+	top: 200px;
+	left: 50px;
+}
+
+#contents_4{
+    position: absolute;
+	top: 200px;
+	left: 180px;
+}
+
+/* #filter */
+#filter {
+    margin: 0 auto;
+    padding: 100px 0 0;
+    width: 200px;
+    text-align: center;
+}
+
+#filter a:link { text-decoration:underline; color: #000;}
+#filter a:visited { text-decoration:none; color: #000;}
+#filter a:active { text-decoration:none; color: #000;}
+#filter a:hover { text-decoration:none; color: #000;}
+#filter .active {
+    font-weight: bold;
+}
+#filter a.active:link { text-decoration:none; color: #000;}
+#filter a.active:visited { text-decoration:none; color: #000;}
+#filter a.active:active { text-decoration:none; color: #000;}
+#filter a.active:hover { text-decoration:none; color: #000;}
+
+/* #filterlist */
+
+#filterlist {
+    margin: 0 auto;
+    padding: 10px 0 0;
+    width: 200px;
+    text-align: left;
+}
+
+#filterlist ul {
+    margin: 0 auto;
+    padding: 0;
+    width: 100px;
+    text-align: left;
+}
+
+#filterlist ul li {
+    margin: 5px;
+    width: 100px;
+    text-align: left;
+    float: left;
+    display: inline;
+    overflow: hidden;
+}
+
+#filterlist ul li img {
+    width: 100px;
+    float: left;
+}
+
+/* ClearFixElements */
+
+#filterlist ul:after {
+    content: ".";
+    height: 0;
+    clear: both;
+    display: block;
+    visibility: hidden;
+}
+
+#filterlist ul {
+    display: inline-block;
+    overflow: hidden;
+}
